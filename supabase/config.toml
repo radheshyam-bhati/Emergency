@@ -1,0 +1,16 @@
+project_id = "pneigprzwbpkzbyrxcwb"
+
+[functions.entity-screen]
+verify_jwt = false
+
+[functions.generate-report]
+verify_jwt = false
+
+[functions.ai-insights]
+verify_jwt = false
+
+[functions.vagr-orchestrator]
+verify_jwt = false
+
+[functions.verify-compliance]
+verify_jwt = false
