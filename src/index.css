@@ -1,4 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import "leaflet/dist/leaflet.css";
+@import "./components/leaflet-styles.css";
 
 @tailwind base;
 @tailwind components;
@@ -6,70 +8,64 @@
 
 @layer base {
   :root {
-    /* VAGR Hub — Futuristic Fintech Dark Theme */
-    --background: 228 25% 5%;
-    --foreground: 210 20% 92%;
+    --background: 220 20% 4%;
+    --foreground: 210 40% 96%;
 
-    --card: 228 22% 9%;
-    --card-foreground: 210 20% 92%;
+    --card: 220 18% 7%;
+    --card-foreground: 210 40% 96%;
 
-    --popover: 228 22% 9%;
-    --popover-foreground: 210 20% 92%;
+    --popover: 220 18% 7%;
+    --popover-foreground: 210 40% 96%;
 
-    --primary: 185 100% 50%;
-    --primary-foreground: 228 25% 5%;
+    --primary: 0 85% 55%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 228 18% 14%;
-    --secondary-foreground: 210 20% 85%;
+    --secondary: 215 80% 50%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 228 15% 16%;
-    --muted-foreground: 215 15% 50%;
+    --muted: 220 15% 12%;
+    --muted-foreground: 215 15% 55%;
 
-    --accent: 220 90% 60%;
-    --accent-foreground: 210 20% 95%;
+    --accent: 160 70% 45%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 85% 55%;
-    --destructive-foreground: 210 20% 95%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 228 15% 16%;
-    --input: 228 15% 16%;
-    --ring: 185 100% 50%;
+    --border: 220 15% 14%;
+    --input: 220 15% 14%;
+    --ring: 0 85% 55%;
 
     --radius: 0.75rem;
 
-    /* Extended palette */
-    --neon-cyan: 185 100% 50%;
-    --neon-blue: 220 90% 60%;
-    --neon-purple: 270 80% 60%;
-    --neon-green: 160 80% 45%;
-    --neon-amber: 40 95% 55%;
-    --neon-red: 0 85% 55%;
+    /* Emergency system tokens */
+    --emergency: 0 85% 55%;
+    --emergency-foreground: 0 0% 100%;
+    --emergency-glow: 0 85% 55%;
+    
+    --critical: 25 95% 55%;
+    --critical-foreground: 0 0% 100%;
+    
+    --stable: 160 70% 45%;
+    --stable-foreground: 0 0% 100%;
+    
+    --warning: 45 95% 55%;
+    --warning-foreground: 0 0% 10%;
+    
+    --info: 215 80% 50%;
+    --info-foreground: 0 0% 100%;
 
-    /* Glass */
-    --glass-bg: 228 22% 9%;
-    --glass-border: 228 15% 20%;
+    --surface-elevated: 220 18% 9%;
+    --surface-overlay: 220 18% 6%;
 
-    /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(185 100% 50%), hsl(220 90% 60%));
-    --gradient-surface: linear-gradient(180deg, hsl(228 22% 10%), hsl(228 25% 6%));
-    --gradient-glow: radial-gradient(ellipse at 50% 0%, hsl(185 100% 50% / 0.15), transparent 70%);
-    --gradient-hero: radial-gradient(ellipse at 30% 20%, hsl(185 100% 50% / 0.08), transparent 50%),
-                     radial-gradient(ellipse at 70% 80%, hsl(220 90% 60% / 0.06), transparent 50%);
-
-    /* Shadows */
-    --shadow-neon: 0 0 20px hsl(185 100% 50% / 0.2), 0 0 60px hsl(185 100% 50% / 0.1);
-    --shadow-card: 0 4px 24px hsl(228 25% 3% / 0.5);
-    --shadow-elevated: 0 8px 40px hsl(228 25% 3% / 0.6);
-
-    /* Sidebar */
-    --sidebar-background: 228 22% 7%;
-    --sidebar-foreground: 210 20% 85%;
-    --sidebar-primary: 185 100% 50%;
-    --sidebar-primary-foreground: 228 25% 5%;
-    --sidebar-accent: 228 18% 14%;
-    --sidebar-accent-foreground: 210 20% 85%;
-    --sidebar-border: 228 15% 14%;
-    --sidebar-ring: 185 100% 50%;
+    --sidebar-background: 220 18% 5%;
+    --sidebar-foreground: 210 40% 96%;
+    --sidebar-primary: 0 85% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 15% 12%;
+    --sidebar-accent-foreground: 210 40% 96%;
+    --sidebar-border: 220 15% 14%;
+    --sidebar-ring: 0 85% 55%;
   }
 }
 
@@ -82,106 +78,82 @@
   }
 }
 
-@layer components {
-  /* Glassmorphism card */
-  .glass-card {
-    @apply relative rounded-xl border border-glass-border bg-glass/80 backdrop-blur-xl;
-    box-shadow: var(--shadow-card);
+@layer utilities {
+  .glow-emergency {
+    box-shadow: 0 0 20px hsl(var(--emergency) / 0.3), 0 0 60px hsl(var(--emergency) / 0.1);
   }
-
-  .glass-card-hover {
-    @apply glass-card transition-all duration-300;
+  .glow-stable {
+    box-shadow: 0 0 20px hsl(var(--stable) / 0.3), 0 0 60px hsl(var(--stable) / 0.1);
   }
-  .glass-card-hover:hover {
-    border-color: hsl(var(--neon-cyan) / 0.3);
-    box-shadow: var(--shadow-neon);
+  .glow-info {
+    box-shadow: 0 0 20px hsl(var(--info) / 0.3), 0 0 60px hsl(var(--info) / 0.1);
   }
-
-  /* Neon text */
-  .text-neon {
-    @apply text-primary;
-    text-shadow: 0 0 20px hsl(var(--neon-cyan) / 0.5), 0 0 40px hsl(var(--neon-cyan) / 0.2);
+  .glow-warning {
+    box-shadow: 0 0 20px hsl(var(--warning) / 0.3), 0 0 60px hsl(var(--warning) / 0.1);
   }
-
-  /* Neon border glow */
-  .border-neon {
-    border-color: hsl(var(--neon-cyan) / 0.4);
-    box-shadow: 0 0 15px hsl(var(--neon-cyan) / 0.15), inset 0 0 15px hsl(var(--neon-cyan) / 0.05);
+  .text-gradient-emergency {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, hsl(var(--emergency)), hsl(var(--critical)));
   }
-
-  /* Glow orb background decoration */
-  .glow-orb {
-    @apply absolute rounded-full blur-3xl pointer-events-none;
+  .text-gradient-hero {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, hsl(var(--foreground)), hsl(var(--muted-foreground)));
   }
-
-  /* Grid pattern overlay */
+  .text-gradient-stable {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, hsl(var(--stable)), hsl(var(--info)));
+  }
   .grid-pattern {
-    background-image:
+    background-image: 
       linear-gradient(hsl(var(--border) / 0.3) 1px, transparent 1px),
       linear-gradient(90deg, hsl(var(--border) / 0.3) 1px, transparent 1px);
     background-size: 60px 60px;
   }
-
-  /* Scanline effect */
-  .scanlines::after {
-    content: '';
-    @apply absolute inset-0 pointer-events-none;
-    background: repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      hsl(var(--neon-cyan) / 0.02) 2px,
-      hsl(var(--neon-cyan) / 0.02) 4px
+  .grid-pattern-dense {
+    background-image: 
+      linear-gradient(hsl(var(--border) / 0.15) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border) / 0.15) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+  .pulse-emergency {
+    animation: pulse-red 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  .shimmer-bg {
+    background: linear-gradient(
+      90deg,
+      hsl(var(--muted)) 25%,
+      hsl(var(--surface-elevated)) 50%,
+      hsl(var(--muted)) 75%
     );
+    background-size: 200% 100%;
+    animation: shimmer 2s linear infinite;
   }
-
-  /* Status indicators */
-  .status-dot {
-    @apply w-2 h-2 rounded-full;
-  }
-  .status-dot-active {
-    @apply status-dot bg-neon-green;
-    box-shadow: 0 0 8px hsl(var(--neon-green) / 0.6);
-  }
-  .status-dot-warning {
-    @apply status-dot bg-neon-amber;
-    box-shadow: 0 0 8px hsl(var(--neon-amber) / 0.6);
-  }
-  .status-dot-danger {
-    @apply status-dot bg-neon-red;
-    box-shadow: 0 0 8px hsl(var(--neon-red) / 0.6);
-  }
-
-  /* Risk level badges */
-  .risk-badge {
-    @apply px-2.5 py-0.5 rounded-full text-xs font-mono font-semibold uppercase tracking-wider;
-  }
-  .risk-low {
-    @apply risk-badge bg-neon-green/10 text-neon-green border border-neon-green/20;
-  }
-  .risk-medium {
-    @apply risk-badge bg-neon-amber/10 text-neon-amber border border-neon-amber/20;
-  }
-  .risk-high {
-    @apply risk-badge bg-neon-red/10 text-neon-red border border-neon-red/20;
-  }
-  .risk-critical {
-    @apply risk-badge bg-neon-red/20 text-neon-red border border-neon-red/40;
-    box-shadow: 0 0 10px hsl(var(--neon-red) / 0.2);
+  .scan-overlay::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      hsl(var(--emergency) / 0.03) 50%,
+      transparent 100%
+    );
+    animation: scan-line 3s linear infinite;
+    pointer-events: none;
   }
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
+@keyframes pulse-red {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
-::-webkit-scrollbar-track {
-  background: hsl(var(--background));
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
-::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted));
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground));
+
+@keyframes scan-line {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
 }

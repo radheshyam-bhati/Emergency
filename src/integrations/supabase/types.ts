@@ -14,431 +14,388 @@ export type Database = {
   }
   public: {
     Tables: {
-      activity_log: {
+      ambulances: {
         Row: {
-          action: string
+          ambulance_type: string
           created_at: string
-          details: Json | null
-          entity_id: string | null
-          entity_type: string | null
+          crew: string | null
+          current_latitude: number
+          current_longitude: number
+          driver_name: string
           id: string
-          user_id: string | null
+          status: Database["public"]["Enums"]["ambulance_status"]
+          vehicle_number: string
         }
         Insert: {
-          action: string
+          ambulance_type?: string
           created_at?: string
-          details?: Json | null
-          entity_id?: string | null
-          entity_type?: string | null
+          crew?: string | null
+          current_latitude: number
+          current_longitude: number
+          driver_name: string
           id?: string
-          user_id?: string | null
+          status?: Database["public"]["Enums"]["ambulance_status"]
+          vehicle_number: string
         }
         Update: {
-          action?: string
+          ambulance_type?: string
           created_at?: string
-          details?: Json | null
-          entity_id?: string | null
-          entity_type?: string | null
+          crew?: string | null
+          current_latitude?: number
+          current_longitude?: number
+          driver_name?: string
           id?: string
-          user_id?: string | null
+          status?: Database["public"]["Enums"]["ambulance_status"]
+          vehicle_number?: string
         }
         Relationships: []
       }
-      alerts: {
+      doctors: {
         Row: {
-          ai_explanation: string | null
-          alert_number: string
-          alert_type: string
+          availability_status: Database["public"]["Enums"]["doctor_availability"]
           created_at: string
-          description: string | null
-          entity_id: string | null
-          entity_name: string
+          hospital_id: string
           id: string
-          resolved_at: string | null
-          risk_level: string
-          status: string
-        }
-        Insert: {
-          ai_explanation?: string | null
-          alert_number: string
-          alert_type: string
-          created_at?: string
-          description?: string | null
-          entity_id?: string | null
-          entity_name: string
-          id?: string
-          resolved_at?: string | null
-          risk_level?: string
-          status?: string
-        }
-        Update: {
-          ai_explanation?: string | null
-          alert_number?: string
-          alert_type?: string
-          created_at?: string
-          description?: string | null
-          entity_id?: string | null
-          entity_name?: string
-          id?: string
-          resolved_at?: string | null
-          risk_level?: string
-          status?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "alerts_entity_id_fkey"
-            columns: ["entity_id"]
-            isOneToOne: false
-            referencedRelation: "entities"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      cases: {
-        Row: {
-          assigned_to: string | null
-          case_number: string
-          created_at: string
-          created_by: string | null
-          description: string | null
-          entity_id: string | null
-          id: string
-          priority: string
-          status: string
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          assigned_to?: string | null
-          case_number: string
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
-          entity_id?: string | null
-          id?: string
-          priority?: string
-          status?: string
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          assigned_to?: string | null
-          case_number?: string
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
-          entity_id?: string | null
-          id?: string
-          priority?: string
-          status?: string
-          title?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "cases_entity_id_fkey"
-            columns: ["entity_id"]
-            isOneToOne: false
-            referencedRelation: "entities"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      entities: {
-        Row: {
-          bods_statement_id: string | null
-          country_risk_score: number | null
-          created_at: string
-          created_by: string | null
-          entity_type: string
-          id: string
-          jurisdiction: string | null
-          metadata: Json | null
           name: string
-          pep_status: string | null
-          risk_score: number | null
-          sanctions_status: string | null
-          source_documents: string[] | null
-          updated_at: string
-          verification_result: Json | null
-          verification_status: string
+          shift_end: string | null
+          shift_start: string | null
+          specialization: string
         }
         Insert: {
-          bods_statement_id?: string | null
-          country_risk_score?: number | null
+          availability_status?: Database["public"]["Enums"]["doctor_availability"]
           created_at?: string
-          created_by?: string | null
-          entity_type?: string
+          hospital_id: string
           id?: string
-          jurisdiction?: string | null
-          metadata?: Json | null
           name: string
-          pep_status?: string | null
-          risk_score?: number | null
-          sanctions_status?: string | null
-          source_documents?: string[] | null
-          updated_at?: string
-          verification_result?: Json | null
-          verification_status?: string
+          shift_end?: string | null
+          shift_start?: string | null
+          specialization: string
         }
         Update: {
-          bods_statement_id?: string | null
-          country_risk_score?: number | null
+          availability_status?: Database["public"]["Enums"]["doctor_availability"]
           created_at?: string
-          created_by?: string | null
-          entity_type?: string
+          hospital_id?: string
           id?: string
-          jurisdiction?: string | null
-          metadata?: Json | null
           name?: string
-          pep_status?: string | null
-          risk_score?: number | null
-          sanctions_status?: string | null
-          source_documents?: string[] | null
-          updated_at?: string
-          verification_result?: Json | null
-          verification_status?: string
-        }
-        Relationships: []
-      }
-      entity_relationships: {
-        Row: {
-          confidence_score: number | null
-          created_at: string
-          id: string
-          is_active: boolean
-          metadata: Json | null
-          ownership_percentage: number | null
-          relationship_type: string
-          source: string | null
-          source_entity_id: string
-          target_entity_id: string
-          valid_from: string | null
-          valid_to: string | null
-          verification_status: string | null
-        }
-        Insert: {
-          confidence_score?: number | null
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          metadata?: Json | null
-          ownership_percentage?: number | null
-          relationship_type: string
-          source?: string | null
-          source_entity_id: string
-          target_entity_id: string
-          valid_from?: string | null
-          valid_to?: string | null
-          verification_status?: string | null
-        }
-        Update: {
-          confidence_score?: number | null
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          metadata?: Json | null
-          ownership_percentage?: number | null
-          relationship_type?: string
-          source?: string | null
-          source_entity_id?: string
-          target_entity_id?: string
-          valid_from?: string | null
-          valid_to?: string | null
-          verification_status?: string | null
+          shift_end?: string | null
+          shift_start?: string | null
+          specialization?: string
         }
         Relationships: [
           {
-            foreignKeyName: "entity_relationships_source_entity_id_fkey"
-            columns: ["source_entity_id"]
+            foreignKeyName: "doctors_hospital_id_fkey"
+            columns: ["hospital_id"]
             isOneToOne: false
-            referencedRelation: "entities"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "entity_relationships_target_entity_id_fkey"
-            columns: ["target_entity_id"]
-            isOneToOne: false
-            referencedRelation: "entities"
+            referencedRelation: "hospitals"
             referencedColumns: ["id"]
           },
         ]
       }
-      notifications: {
+      emergency_requests: {
         Row: {
+          assigned_ambulance_id: string | null
+          assigned_hospital_id: string | null
+          condition_type: string
           created_at: string
+          eta: string | null
           id: string
-          is_read: boolean
-          link: string | null
-          message: string | null
-          title: string
-          type: string
-          user_id: string
+          patient_id: string | null
+          pickup_address: string | null
+          pickup_latitude: number
+          pickup_longitude: number
+          resolved_at: string | null
+          severity: string
+          status: Database["public"]["Enums"]["emergency_status"]
         }
         Insert: {
+          assigned_ambulance_id?: string | null
+          assigned_hospital_id?: string | null
+          condition_type: string
           created_at?: string
+          eta?: string | null
           id?: string
-          is_read?: boolean
-          link?: string | null
-          message?: string | null
-          title: string
-          type?: string
-          user_id: string
+          patient_id?: string | null
+          pickup_address?: string | null
+          pickup_latitude: number
+          pickup_longitude: number
+          resolved_at?: string | null
+          severity?: string
+          status?: Database["public"]["Enums"]["emergency_status"]
         }
         Update: {
+          assigned_ambulance_id?: string | null
+          assigned_hospital_id?: string | null
+          condition_type?: string
+          created_at?: string
+          eta?: string | null
+          id?: string
+          patient_id?: string | null
+          pickup_address?: string | null
+          pickup_latitude?: number
+          pickup_longitude?: number
+          resolved_at?: string | null
+          severity?: string
+          status?: Database["public"]["Enums"]["emergency_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "emergency_requests_assigned_ambulance_id_fkey"
+            columns: ["assigned_ambulance_id"]
+            isOneToOne: false
+            referencedRelation: "ambulances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "emergency_requests_assigned_hospital_id_fkey"
+            columns: ["assigned_hospital_id"]
+            isOneToOne: false
+            referencedRelation: "hospitals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "emergency_requests_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hospital_resources: {
+        Row: {
+          emergency_beds_available: number
+          emergency_beds_total: number
+          general_beds_available: number
+          general_beds_total: number
+          hospital_id: string
+          icu_beds_available: number
+          icu_beds_total: number
+          id: string
+          last_updated: string
+          ventilators_available: number
+          ventilators_total: number
+        }
+        Insert: {
+          emergency_beds_available?: number
+          emergency_beds_total?: number
+          general_beds_available?: number
+          general_beds_total?: number
+          hospital_id: string
+          icu_beds_available?: number
+          icu_beds_total?: number
+          id?: string
+          last_updated?: string
+          ventilators_available?: number
+          ventilators_total?: number
+        }
+        Update: {
+          emergency_beds_available?: number
+          emergency_beds_total?: number
+          general_beds_available?: number
+          general_beds_total?: number
+          hospital_id?: string
+          icu_beds_available?: number
+          icu_beds_total?: number
+          id?: string
+          last_updated?: string
+          ventilators_available?: number
+          ventilators_total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hospital_resources_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: true
+            referencedRelation: "hospitals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hospitals: {
+        Row: {
+          address: string
+          city: string
+          contact_number: string | null
+          created_at: string
+          id: string
+          latitude: number
+          longitude: number
+          name: string
+          rating: number | null
+          specialization: string[] | null
+          status: string
+        }
+        Insert: {
+          address: string
+          city?: string
+          contact_number?: string | null
           created_at?: string
           id?: string
-          is_read?: boolean
-          link?: string | null
-          message?: string | null
-          title?: string
-          type?: string
-          user_id?: string
+          latitude: number
+          longitude: number
+          name: string
+          rating?: number | null
+          specialization?: string[] | null
+          status?: string
+        }
+        Update: {
+          address?: string
+          city?: string
+          contact_number?: string | null
+          created_at?: string
+          id?: string
+          latitude?: number
+          longitude?: number
+          name?: string
+          rating?: number | null
+          specialization?: string[] | null
+          status?: string
+        }
+        Relationships: []
+      }
+      patients: {
+        Row: {
+          address: string | null
+          age: number | null
+          allergies: string[] | null
+          blood_group: string | null
+          created_at: string
+          diseases: string[] | null
+          emergency_contact: string | null
+          gender: string | null
+          id: string
+          medications: string[] | null
+          name: string
+          phone: string | null
+          previous_surgeries: string[] | null
+        }
+        Insert: {
+          address?: string | null
+          age?: number | null
+          allergies?: string[] | null
+          blood_group?: string | null
+          created_at?: string
+          diseases?: string[] | null
+          emergency_contact?: string | null
+          gender?: string | null
+          id?: string
+          medications?: string[] | null
+          name: string
+          phone?: string | null
+          previous_surgeries?: string[] | null
+        }
+        Update: {
+          address?: string | null
+          age?: number | null
+          allergies?: string[] | null
+          blood_group?: string | null
+          created_at?: string
+          diseases?: string[] | null
+          emergency_contact?: string | null
+          gender?: string | null
+          id?: string
+          medications?: string[] | null
+          name?: string
+          phone?: string | null
+          previous_surgeries?: string[] | null
         }
         Relationships: []
       }
       profiles: {
         Row: {
+          ambulance_id: string | null
           avatar_url: string | null
           created_at: string
-          display_name: string | null
+          email: string | null
+          full_name: string | null
+          hospital_id: string | null
           id: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          avatar_url?: string | null
-          created_at?: string
-          display_name?: string | null
-          id?: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          avatar_url?: string | null
-          created_at?: string
-          display_name?: string | null
-          id?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      reports: {
-        Row: {
-          agents_used: string[] | null
-          ai_summary: string | null
-          confidence: number | null
-          content: string | null
-          created_at: string
-          created_by: string | null
-          entity_id: string | null
-          findings_count: number | null
-          id: string
-          report_number: string
-          report_type: string
-          status: string
-          title: string
+          role: Database["public"]["Enums"]["app_role"]
           updated_at: string
         }
         Insert: {
-          agents_used?: string[] | null
-          ai_summary?: string | null
-          confidence?: number | null
-          content?: string | null
+          ambulance_id?: string | null
+          avatar_url?: string | null
           created_at?: string
-          created_by?: string | null
-          entity_id?: string | null
-          findings_count?: number | null
-          id?: string
-          report_number: string
-          report_type?: string
-          status?: string
-          title: string
+          email?: string | null
+          full_name?: string | null
+          hospital_id?: string | null
+          id: string
+          role?: Database["public"]["Enums"]["app_role"]
           updated_at?: string
         }
         Update: {
-          agents_used?: string[] | null
-          ai_summary?: string | null
-          confidence?: number | null
-          content?: string | null
+          ambulance_id?: string | null
+          avatar_url?: string | null
           created_at?: string
-          created_by?: string | null
-          entity_id?: string | null
-          findings_count?: number | null
+          email?: string | null
+          full_name?: string | null
+          hospital_id?: string | null
           id?: string
-          report_number?: string
-          report_type?: string
-          status?: string
-          title?: string
+          role?: Database["public"]["Enums"]["app_role"]
           updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "reports_entity_id_fkey"
-            columns: ["entity_id"]
+            foreignKeyName: "profiles_ambulance_id_fkey"
+            columns: ["ambulance_id"]
             isOneToOne: false
-            referencedRelation: "entities"
+            referencedRelation: "ambulances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "hospitals"
             referencedColumns: ["id"]
           },
         ]
       }
-      ubo_results: {
+      routes: {
         Row: {
-          beneficial_owner_id: string | null
-          control_type: string | null
+          ai_score: number | null
           created_at: string
-          created_by: string | null
-          detection_method: string | null
+          distance_km: number
+          emergency_id: string
+          estimated_time: number
+          hospital_id: string
           id: string
-          is_ubo: boolean
-          ownership_chain: Json
-          root_entity_id: string
-          total_ownership_pct: number
-          verification_details: Json | null
-          verified: boolean
+          traffic_level: Database["public"]["Enums"]["traffic_level"]
         }
         Insert: {
-          beneficial_owner_id?: string | null
-          control_type?: string | null
+          ai_score?: number | null
           created_at?: string
-          created_by?: string | null
-          detection_method?: string | null
+          distance_km: number
+          emergency_id: string
+          estimated_time: number
+          hospital_id: string
           id?: string
-          is_ubo?: boolean
-          ownership_chain?: Json
-          root_entity_id: string
-          total_ownership_pct?: number
-          verification_details?: Json | null
-          verified?: boolean
+          traffic_level?: Database["public"]["Enums"]["traffic_level"]
         }
         Update: {
-          beneficial_owner_id?: string | null
-          control_type?: string | null
+          ai_score?: number | null
           created_at?: string
-          created_by?: string | null
-          detection_method?: string | null
+          distance_km?: number
+          emergency_id?: string
+          estimated_time?: number
+          hospital_id?: string
           id?: string
-          is_ubo?: boolean
-          ownership_chain?: Json
-          root_entity_id?: string
-          total_ownership_pct?: number
-          verification_details?: Json | null
-          verified?: boolean
+          traffic_level?: Database["public"]["Enums"]["traffic_level"]
         }
         Relationships: [
           {
-            foreignKeyName: "ubo_results_beneficial_owner_id_fkey"
-            columns: ["beneficial_owner_id"]
+            foreignKeyName: "routes_emergency_id_fkey"
+            columns: ["emergency_id"]
             isOneToOne: false
-            referencedRelation: "entities"
+            referencedRelation: "emergency_requests"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "ubo_results_root_entity_id_fkey"
-            columns: ["root_entity_id"]
+            foreignKeyName: "routes_hospital_id_fkey"
+            columns: ["hospital_id"]
             isOneToOne: false
-            referencedRelation: "entities"
+            referencedRelation: "hospitals"
             referencedColumns: ["id"]
           },
         ]
@@ -451,7 +408,7 @@ export type Database = {
         }
         Insert: {
           id?: string
-          role?: Database["public"]["Enums"]["app_role"]
+          role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Update: {
@@ -461,73 +418,22 @@ export type Database = {
         }
         Relationships: []
       }
-      verification_log: {
-        Row: {
-          agent_outputs: Json | null
-          constraints_checked: Json | null
-          constraints_satisfied: Json | null
-          constraints_violated: Json | null
-          created_at: string
-          created_by: string | null
-          entity_id: string | null
-          id: string
-          reasoning_trace: string | null
-          status: string
-          verification_type: string
-        }
-        Insert: {
-          agent_outputs?: Json | null
-          constraints_checked?: Json | null
-          constraints_satisfied?: Json | null
-          constraints_violated?: Json | null
-          created_at?: string
-          created_by?: string | null
-          entity_id?: string | null
-          id?: string
-          reasoning_trace?: string | null
-          status?: string
-          verification_type: string
-        }
-        Update: {
-          agent_outputs?: Json | null
-          constraints_checked?: Json | null
-          constraints_satisfied?: Json | null
-          constraints_violated?: Json | null
-          created_at?: string
-          created_by?: string | null
-          entity_id?: string | null
-          id?: string
-          reasoning_trace?: string | null
-          status?: string
-          verification_type?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "verification_log_entity_id_fkey"
-            columns: ["entity_id"]
-            isOneToOne: false
-            referencedRelation: "entities"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      get_ownership_graph: {
-        Args: { max_depth?: number; root_entity_id: string }
+      find_hospitals_in_radius: {
+        Args: { p_lat: number; p_lng: number; p_radius_km?: number }
         Returns: {
-          depth: number
-          ownership_percentage: number
-          relationship_type: string
-          source_id: string
-          source_name: string
-          source_type: string
-          target_id: string
-          target_name: string
-          target_type: string
+          distance_km: number
+          er_available: number
+          hospital_id: string
+          hospital_name: string
+          hospital_status: string
+          icu_available: number
+          specialization: string[]
+          ventilators_available: number
         }[]
       }
       has_role: {
@@ -539,7 +445,17 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "analyst" | "regulator"
+      ambulance_status: "available" | "on_route" | "busy"
+      app_role: "admin" | "hospital" | "ambulance" | "doctor"
+      doctor_availability: "available" | "on_duty" | "off_duty" | "on_leave"
+      emergency_status:
+        | "new"
+        | "dispatched"
+        | "in_transit"
+        | "arrived"
+        | "resolved"
+        | "cancelled"
+      traffic_level: "low" | "moderate" | "heavy" | "blocked"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -667,7 +583,18 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "analyst", "regulator"],
+      ambulance_status: ["available", "on_route", "busy"],
+      app_role: ["admin", "hospital", "ambulance", "doctor"],
+      doctor_availability: ["available", "on_duty", "off_duty", "on_leave"],
+      emergency_status: [
+        "new",
+        "dispatched",
+        "in_transit",
+        "arrived",
+        "resolved",
+        "cancelled",
+      ],
+      traffic_level: ["low", "moderate", "heavy", "blocked"],
     },
   },
 } as const

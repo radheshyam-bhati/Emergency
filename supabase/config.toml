@@ -1,16 +1,19 @@
-project_id = "pneigprzwbpkzbyrxcwb"
+project_id = "vfvnzaqglrzxatsoqawb"
 
-[functions.entity-screen]
+[functions.hospital-api]
 verify_jwt = false
 
-[functions.generate-report]
+[functions.ambulance-api]
 verify_jwt = false
 
-[functions.ai-insights]
+[functions.emergency-api]
 verify_jwt = false
 
-[functions.vagr-orchestrator]
+[functions.patient-api]
 verify_jwt = false
 
-[functions.verify-compliance]
+[functions.admin-api]
+verify_jwt = false
+
+[functions.recommend-hospital]
 verify_jwt = false
