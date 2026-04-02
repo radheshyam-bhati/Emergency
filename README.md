@@ -9,7 +9,7 @@ Rapid Rescue Grid is a React and TypeScript application for coordinating emergen
 - Vite
 - Tailwind CSS
 - shadcn/ui
-- Supabase
+- Local mock simulation
 
 ## Getting Started
 
@@ -31,14 +31,13 @@ npm run dev
 npm run build
 ```
 
-## Environment Variables
+## Login
 
-Create a local `.env` file with the following values:
+Use the built-in local administrator account:
 
-```sh
-VITE_SUPABASE_PROJECT_ID=
-VITE_SUPABASE_PUBLISHABLE_KEY=
-VITE_SUPABASE_URL=
+```txt
+Email: admin@gmail.com
+Password: admin@123
 ```
 
 ## Available Scripts
@@ -51,5 +50,6 @@ VITE_SUPABASE_URL=
 ## Project Structure
 
 - `src/` contains the React application.
-- `supabase/functions/` contains edge functions used by the app.
-- `supabase/migrations/` contains database migrations.
+- `src/data/` contains local mock data used by the simulation.
+- `src/hooks/useSimulation.ts` manages the shared live simulation state.
+# helthtech

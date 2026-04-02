@@ -1,31 +1,49 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import type { Database } from "@/integrations/supabase/types";
-import type { AuthError, Session, User } from "@supabase/supabase-js";
 
-type Profile = Database["public"]["Tables"]["profiles"]["Row"];
-type AuthRole = Profile["role"];
+export interface AuthError {
+  message: string;
+}
+
+export interface AuthUser {
+  id: string;
+  email: string;
+}
+
+export interface AuthProfile {
+  email: string;
+  fullName: string;
+  role: "admin";
+}
 
 interface AuthResponse {
   error: AuthError | null;
 }
 
 interface AuthContextType {
-  user: User | null;
-  session: Session | null;
-  profile: Profile | null;
+  user: AuthUser | null;
+  profile: AuthProfile | null;
   loading: boolean;
-  signUp: (email: string, password: string, fullName: string, role: AuthRole) => Promise<AuthResponse>;
   signIn: (email: string, password: string) => Promise<AuthResponse>;
   signOut: () => Promise<void>;
 }
 
+const ADMIN_EMAIL = "admin@gmail.com";
+const ADMIN_PASSWORD = "admin@123";
+const STORAGE_KEY = "rapid-rescue-grid-auth";
+
 const AuthContext = createContext<AuthContextType | null>(null);
 
-async function fetchProfile(userId: string) {
-  const { data } = await supabase.from("profiles").select("*").eq("id", userId).single();
-  return data;
-}
+const createAdminSession = (): { profile: AuthProfile; user: AuthUser } => ({
+  user: {
+    id: "local-admin",
+    email: ADMIN_EMAIL,
+  },
+  profile: {
+    email: ADMIN_EMAIL,
+    fullName: "System Administrator",
+    role: "admin",
+  },
+});
 
 export function useAuth() {
   const context = useContext(AuthContext);
@@ -38,74 +56,46 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [profile, setProfile] = useState<AuthProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, nextSession) => {
-      setSession(nextSession);
-      setUser(nextSession?.user ?? null);
+    const storedValue = window.localStorage.getItem(STORAGE_KEY);
 
-      if (nextSession?.user) {
-        // Defer the profile query so auth state updates are not blocked.
-        setTimeout(() => {
-          void fetchProfile(nextSession.user.id).then(setProfile);
-        }, 0);
-      } else {
-        setProfile(null);
-      }
+    if (storedValue === ADMIN_EMAIL) {
+      const adminSession = createAdminSession();
+      setUser(adminSession.user);
+      setProfile(adminSession.profile);
+    }
 
-      setLoading(false);
-    });
-
-    void supabase.auth.getSession().then(async ({ data: { session: currentSession } }) => {
-      setSession(currentSession);
-      setUser(currentSession?.user ?? null);
-
-      if (currentSession?.user) {
-        setProfile(await fetchProfile(currentSession.user.id));
-      } else {
-        setProfile(null);
-      }
-
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
+    setLoading(false);
   }, []);
 
-  async function signUp(email: string, password: string, fullName: string, role: AuthRole) {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { full_name: fullName, role },
-        emailRedirectTo: window.location.origin,
-      },
-    });
+  async function signIn(email: string, password: string): Promise<AuthResponse> {
+    const normalizedEmail = email.trim().toLowerCase();
 
-    return { error };
-  }
+    if (normalizedEmail !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
+      return {
+        error: {
+          message: "Use admin@gmail.com with password admin@123.",
+        },
+      };
+    }
 
-  async function signIn(email: string, password: string) {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error };
+    const adminSession = createAdminSession();
+    window.localStorage.setItem(STORAGE_KEY, ADMIN_EMAIL);
+    setUser(adminSession.user);
+    setProfile(adminSession.profile);
+
+    return { error: null };
   }
 
   async function signOut() {
-    await supabase.auth.signOut();
+    window.localStorage.removeItem(STORAGE_KEY);
     setUser(null);
-    setSession(null);
     setProfile(null);
   }
 
-  return (
-    <AuthContext.Provider value={{ user, session, profile, loading, signUp, signIn, signOut }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={{ user, profile, loading, signIn, signOut }}>{children}</AuthContext.Provider>;
 }

@@ -18,7 +18,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { dispatchApi } from "@/services/api";
+import { type DispatchResult, useSimulation } from "@/hooks/useSimulation";
 
 const CONDITIONS = [
   "Cardiac Arrest", "Stroke", "Road Accident", "Severe Burns",
@@ -40,54 +40,8 @@ const DEFAULT_COORDINATES = {
 
 type FormStep = "dispatching" | "form" | "results";
 
-interface Recommendation {
-  hospital_id: string;
-  hospital_name: string;
-  score: number;
-  distance_km: number;
-  eta_minutes: number;
-  icu_available: number;
-  er_available: number;
-  ventilators_available: number;
-  matched_doctors: string[];
-  reasons: string[];
-  breakdown: {
-    doctor_match: number;
-    icu_availability: number;
-    specialization: number;
-    travel_time: number;
-  };
-}
-
-interface DispatchStep {
-  step: string;
-  status: string;
-  detail?: string;
-  duration_ms?: number;
-}
-
-interface DispatchResult {
-  success: boolean;
-  emergency_id: string;
-  recommended_hospital: string;
-  hospital_id: string;
-  eta_minutes: number;
-  distance_km: number;
-  ai_score: number;
-  ambulance: {
-    id: string;
-    vehicle_number: string;
-    type: string;
-    crew: string;
-    distance_km: number;
-  } | null;
-  all_recommendations: Recommendation[];
-  steps: DispatchStep[];
-  total_time_ms: number;
-  error?: string;
-}
-
 function NewEmergencyForm() {
+  const { dispatchEmergency } = useSimulation();
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState<FormStep>("form");
   const [patientName, setPatientName] = useState("");
@@ -127,9 +81,9 @@ function NewEmergencyForm() {
     setStep("dispatching");
 
     try {
-      const response = await dispatchApi.dispatch<DispatchResult>({
+      const response = await dispatchEmergency({
         condition_type: condition,
-        severity,
+        severity: severity as "critical" | "minor" | "moderate" | "serious",
         pickup_latitude: parseFloat(latitude),
         pickup_longitude: parseFloat(longitude),
         pickup_address: address || undefined,
@@ -193,8 +147,8 @@ function NewEmergencyForm() {
                       {step === "results" && "Dispatch Complete"}
                     </h2>
                     <p className="text-[11px] text-muted-foreground">
-                      {step === "form" && "Full auto-dispatch: AI selects hospital → ambulance dispatched → bed reserved"}
-                      {step === "dispatching" && "Running 6-step orchestration with OSRM routing..."}
+                      {step === "form" && "Local auto-dispatch scores hospitals, assigns an ambulance, and reserves a bed"}
+                      {step === "dispatching" && "Running the local dispatch workflow..."}
                       {step === "results" && `Completed in ${result?.total_time_ms}ms`}
                     </p>
                   </div>
@@ -323,7 +277,7 @@ function NewEmergencyForm() {
                   <div className="text-center">
                     <p className="text-sm font-semibold">Full Dispatch Pipeline Running</p>
                     <p className="mt-1 text-xs text-muted-foreground">
-                      Creating emergency → Finding ambulance → AI scoring hospitals → OSRM routing → Reserving bed...
+                      Creating emergency → Finding an ambulance → Scoring hospitals → Reserving bed...
                     </p>
                   </div>
                 </div>
@@ -402,7 +356,7 @@ function NewEmergencyForm() {
                   <div>
                     <h3 className="mb-2 flex items-center gap-2 text-xs font-semibold">
                       <Brain className="h-3.5 w-3.5 text-info" />
-                      AI Hospital Rankings (OSRM ETA)
+                      Hospital Rankings
                     </h3>
                     <div className="space-y-2">
                       {result.all_recommendations.map((hospital, index) => (
