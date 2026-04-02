@@ -59,7 +59,7 @@ const SidebarContent = ({ onNavigate }: { onNavigate?: () => void }) => {
       <div className="border-t border-border p-2">
         {profile && (
           <div className="mb-2 rounded-lg bg-muted/30 px-3 py-2">
-            <div className="text-xs font-medium truncate">{profile.full_name || profile.email}</div>
+            <div className="text-xs font-medium truncate">{profile.fullName || profile.email}</div>
             <div className="text-[10px] text-muted-foreground capitalize">{profile.role}</div>
           </div>
         )}
