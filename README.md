@@ -1,46 +1,55 @@
-# VAGR Hub
+# Rapid Rescue Grid
 
-VAGR Hub is a React and TypeScript application for compliance intelligence, entity screening, ownership graph analysis, alert monitoring, and investigation reporting.
+Rapid Rescue Grid is a React and TypeScript application for coordinating emergency dispatch, ambulance availability, and hospital capacity across a connected care network.
 
 ## Stack
 
-- Vite
 - React 18
 - TypeScript
+- Vite
 - Tailwind CSS
 - shadcn/ui
 - Supabase
 
-## Local development
+## Getting Started
+
+1. Install dependencies:
 
 ```sh
 npm install
+```
+
+2. Start the development server:
+
+```sh
 npm run dev
 ```
 
-The development server runs on `http://localhost:8080`.
-
-## Environment
-
-Frontend environment variables:
-
-- `VITE_SUPABASE_URL`
-- `VITE_SUPABASE_PUBLISHABLE_KEY`
-
-Supabase Edge Function secrets:
-
-- `SUPABASE_URL`
-- `SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY`
-- `AI_GATEWAY_API_KEY`
-- `AI_GATEWAY_URL`
-
-`AI_GATEWAY_API_KEY` and `AI_GATEWAY_URL` are optional. When they are not configured, the application falls back to non-AI responses where supported.
-
-## Quality checks
+3. Build the production bundle:
 
 ```sh
-npx tsc --noEmit
-npm run lint
 npm run build
 ```
+
+## Environment Variables
+
+Create a local `.env` file with the following values:
+
+```sh
+VITE_SUPABASE_PROJECT_ID=
+VITE_SUPABASE_PUBLISHABLE_KEY=
+VITE_SUPABASE_URL=
+```
+
+## Available Scripts
+
+- `npm run dev` starts the local development server.
+- `npm run build` creates the production bundle.
+- `npm run lint` runs ESLint.
+- `npm run test` runs the Vitest suite.
+
+## Project Structure
+
+- `src/` contains the React application.
+- `supabase/functions/` contains edge functions used by the app.
+- `supabase/migrations/` contains database migrations.
