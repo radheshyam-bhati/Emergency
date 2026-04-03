@@ -1,6 +1,8 @@
-import { Emergency } from "@/data/mockData";
+import type { Emergency } from "@/types/domain";
 import { AlertTriangle, Clock, Ambulance, MapPin } from "lucide-react";
 import { motion } from "framer-motion";
+import { formatEta, formatRelativeTime } from "@/lib/time";
+import { getFallbackMessage } from "@/lib/dispatch";
 
 const severityStyles: Record<string, { bg: string; text: string; dot: string }> = {
   critical: { bg: "bg-emergency/10", text: "text-emergency", dot: "bg-emergency" },
@@ -10,11 +12,13 @@ const severityStyles: Record<string, { bg: string; text: string; dot: string }> 
 };
 
 const statusLabels: Record<string, string> = {
-  new: "Awaiting Dispatch",
-  dispatched: "Ambulance Dispatched",
+  pending: "Awaiting Dispatch",
+  queued: "Queued for Allocation",
+  assigned: "Ambulance Assigned",
   "in-transit": "In Transit",
   arrived: "Arrived at Hospital",
-  resolved: "Resolved",
+  completed: "Completed",
+  cancelled: "Cancelled",
 };
 
 const EmergencyCard = ({ emergency, index }: { emergency: Emergency; index: number }) => {
@@ -38,7 +42,7 @@ const EmergencyCard = ({ emergency, index }: { emergency: Emergency; index: numb
         </div>
         <span className="flex items-center gap-1 text-xs text-muted-foreground">
           <Clock className="h-3 w-3" />
-          {emergency.timestamp}
+          {formatRelativeTime(emergency.createdAt)}
         </span>
       </div>
 
@@ -50,21 +54,30 @@ const EmergencyCard = ({ emergency, index }: { emergency: Emergency; index: numb
       <div className="mt-3 space-y-1.5 text-xs text-muted-foreground">
         <div className="flex items-center gap-1.5">
           <MapPin className="h-3 w-3" />
-          {emergency.location}
+          {emergency.pickupAddress}
         </div>
-        {emergency.assignedAmbulance && (
+        {emergency.assignedAmbulance && emergency.assignedHospital && (
           <div className="flex items-center gap-1.5">
             <Ambulance className="h-3 w-3" />
-            {emergency.assignedAmbulance} → {emergency.assignedHospital}
+            {emergency.assignedAmbulance.vehicleNumber} → {emergency.assignedHospital.name}
+          </div>
+        )}
+        {emergency.queueReason && (
+          <div className="rounded-md bg-warning/10 px-2 py-1 text-[10px] font-medium text-warning">
+            {getFallbackMessage(
+              emergency.dispatch?.fallbackStrategy ?? "waitlist",
+              emergency.queueReason,
+              emergency.dispatch?.retryCount ?? 0,
+            )}
           </div>
         )}
       </div>
 
       <div className="mt-3 flex items-center justify-between">
         <span className="text-xs font-medium text-info">{statusLabels[emergency.status]}</span>
-        {emergency.eta && (
+        {emergency.dispatch?.etaMinutes && (
           <span className="rounded-md bg-emergency/10 px-2 py-0.5 text-[10px] font-bold text-emergency">
-            ETA {emergency.eta}
+            ETA {formatEta(emergency.dispatch.etaMinutes)}
           </span>
         )}
       </div>

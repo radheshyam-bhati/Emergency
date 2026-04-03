@@ -1,239 +1,208 @@
 # Rapid Rescue Grid
 
-Rapid Rescue Grid is a real-time emergency coordination dashboard built with React, TypeScript, and Vite. It simulates how a regional command center can track live emergencies, dispatch ambulances, rank hospitals by readiness, and monitor operational capacity across a connected hospital network.
+Rapid Rescue Grid is a full-stack emergency response platform for managing incidents, ambulance allocation, hospital selection, and operator visibility in real time. It combines a React frontend with an Express and SQLite backend to deliver a practical command-center workflow with explainable dispatch decisions.
 
 ## Overview
 
-This project is currently implemented as a local demo environment. Instead of depending on a live backend, it uses in-memory simulation state, seeded hospital and ambulance datasets, and local authentication to model emergency response workflows end to end.
-
-The application is designed around multiple operator views:
-
-- A command center for dispatch and live incident tracking
-- A hospital network dashboard for bed, ventilator, and doctor availability
-- An ambulance fleet dashboard with status and location monitoring
-- An AI hospital finder that ranks hospitals by suitability for a case
-- An admin analytics panel for overall system visibility
+The platform is designed to simulate a regional emergency coordination system instead of a frontend-only prototype. Operators can authenticate, create emergencies, review dispatch decisions, monitor ambulances, inspect hospital capacity, and track operational activity through a set of connected dashboards backed by persistent data and server-side decision logic.
 
 ## Tech Stack & Tools
 
-### Core
+### Frontend
 
-- React 18
+- React
 - TypeScript
 - Vite
-- React Router DOM
+- React Router
 - TanStack Query
-
-### UI and UX
-
 - Tailwind CSS
 - shadcn/ui
-- Radix UI
 - Framer Motion
-- Lucide React
-
-### Mapping and Visualization
-
 - Leaflet
-- CARTO dark basemap tiles
-- OSRM public routing API for route comparison on the live map
-- Recharts for operational analytics
+- Recharts
 
-### Quality and Tooling
+### Backend
+
+- Node.js
+- Express
+- TypeScript
+- SQLite
+- better-sqlite3
+- JWT
+- bcryptjs
+- Zod
+
+### Tooling
 
 - ESLint
 - Vitest
-- Testing Library
-- PostCSS
-
-## Installation and Setup
-
-### Prerequisites
-
-- Node.js 18+ recommended
+- tsx
+- TypeScript compiler
 - npm
 
-### Install
+## Installation & Setup
+
+### 1. Install dependencies
 
 ```sh
 npm install
 ```
 
-### Run the app locally
+### 2. Configure environment variables
+
+Create a `.env` file from `.env.example`.
+
+```env
+API_PORT=3001
+JWT_SECRET=replace-with-a-long-random-secret
+```
+
+### 3. Seed the database
+
+```sh
+npm run db:seed
+```
+
+### 4. Start the frontend and backend
 
 ```sh
 npm run dev
 ```
 
-Open the Vite development URL shown in your terminal, usually:
+### 5. Open the application
+
+Frontend:
 
 ```txt
 http://localhost:5173
 ```
 
-### Build for production
-
-```sh
-npm run build
-```
-
-### Preview the production build
-
-```sh
-npm run preview
-```
-
-### Run checks
-
-```sh
-npm run lint
-npm run test
-```
-
-### Environment setup
-
-No environment variables are required for the current local demo mode.
-
-If needed, you can keep a local `.env` file, but the app runs without external API keys or backend credentials in this version.
-
-### Demo login
-
-Use the built-in administrator credentials:
+API:
 
 ```txt
+http://localhost:3001
+```
+
+Health check:
+
+```txt
+http://localhost:3001/api/health
+```
+
+### Useful scripts
+
+```sh
+npm run dev
+npm run dev:client
+npm run dev:server
+npm run build
+npm run build:client
+npm run build:server
+npm run db:seed
+npm run lint
+npm run test
+npm run typecheck
+```
+
+### Demo credentials
+
+```txt
+Admin
 Email: admin@gmail.com
 Password: admin@123
+
+Dispatcher
+Email: dispatcher@gmail.com
+Password: dispatch@123
 ```
 
 ## Features
 
-### Emergency command center
-
-- Live overview of active emergencies, ambulance availability, ICU capacity, and response time
-- One-click emergency intake through the `New Emergency` dispatch form
-- Real-time activity feed for emergency creation, dispatch events, and bed reservations
-- Interactive map showing hospitals, ambulances, and active emergency markers
-
-### Local auto-dispatch workflow
-
-- Validates incident details before dispatch
-- Finds the nearest available ambulance
-- Scores hospitals using capacity, specialization, doctor availability, and travel time
-- Assigns the best-ranked hospital
-- Reduces available emergency and ICU resources after reservation
-- Returns a dispatch pipeline summary with timing and hospital ranking details
-
-### Hospital operations dashboard
-
-- Aggregated counts for ICU beds, emergency beds, ventilators, and doctors on duty
-- Search across hospital names and specializations
-- Card-based view of hospital readiness and specializations
-- Live map visibility for all connected hospitals
-
-### Ambulance fleet dashboard
-
-- Tracks current vehicle status across available, dispatched, en-route, and at-hospital states
-- Shows crew, vehicle type, and simulated live coordinates
-- Highlights ambulances assigned to active emergencies
-
-### AI hospital finder
-
-- Ranks hospitals based on the selected patient condition
-- Combines specialization match, bed availability, doctor availability, ventilator capacity, and estimated travel time
-- Surfaces a best-match recommendation with explainable scoring reasons
-
-### Admin analytics
-
-- Fleet distribution and emergency severity breakdown
-- Hospital bed availability comparisons
-- Response-time trend charts
-- System event stream and access-role summary
+- Role-based authentication for `admin` and `dispatcher` users
+- Emergency intake workflow from the command center dashboard
+- Smart Emergency Allocation Engine for hospital ranking
+- Real ambulance assignment using backend availability rules
+- Queue fallback handling when no ambulance or capable hospital is available
+- Persistent SQLite storage for emergencies, dispatches, users, hospitals, ambulances, and activity logs
+- Hospital, ambulance, admin, patient, and command-center dashboards
+- Explainable dispatch snapshots showing ranking context and alternatives
+- Metrics and activity visibility for operational monitoring
+- Map-based ambulance and hospital visualization
 
 ## Technical Workflow
 
-### 1. Application bootstrap
+### High-Level Flow
 
-- `src/main.tsx` mounts the React app
-- `src/App.tsx` wires together:
-  - `QueryClientProvider`
-  - `TooltipProvider`
-  - toast systems
-  - `BrowserRouter`
-  - `AuthProvider`
-  - `SimulationProvider`
+`UI -> frontend service layer -> Express API -> SQLite -> API response -> dashboard refresh`
 
-### 2. Authentication flow
+### Request Lifecycle
 
-- `src/contexts/AuthContext.tsx` manages local authentication
-- Successful sign-in stores the session marker in `localStorage`
-- `ProtectedRoute` restricts dashboard pages to authenticated users
-- The `/admin` route is additionally guarded for the admin role
+1. A user interacts with the frontend dashboard.
+2. The frontend sends requests through the service layer in `src/api`.
+3. Express routes receive the request and pass control to controllers.
+4. Controllers validate input and delegate business logic to services.
+5. Services read and update SQLite-backed models and operational state.
+6. The API returns structured JSON to the frontend.
+7. TanStack Query refreshes affected views and updates the UI.
 
-### 3. Simulation state flow
+### Dispatch Workflow
 
-- `src/hooks/useSimulation.ts` is the runtime data engine for the app
-- It initializes seeded data for:
-  - hospitals
-  - ambulances
-  - emergencies
-  - activity feed events
-- Timers simulate:
-  - ambulance movement
-  - status changes
-  - resource fluctuations
-  - incoming emergency creation
+1. An operator creates an emergency.
+2. The backend stores the emergency record.
+3. The Smart Emergency Allocation Engine ranks eligible hospitals using severity, distance, specialization, and capacity data.
+4. The backend searches for the nearest available ambulance.
+5. The selected hospital and ambulance are reserved and linked to the emergency.
+6. Dispatch details, score breakdowns, and ranking snapshots are persisted.
+7. The frontend reflects the selected assignment and fallback status.
 
-### 4. Dispatch workflow
+### Queue & Fallback Workflow
 
-When an operator submits a case through `src/components/NewEmergencyForm.tsx`, the app runs this flow:
+- If no ambulance is available, the emergency is marked `queued` with reason `NO_AMBULANCE`.
+- If no hospital meets the capability threshold, the emergency is marked `queued` with reason `NO_CAPABLE_HOSPITAL`.
+- The operations lifecycle loop retries eligible queued work during backend sync cycles.
 
-1. Validate condition and pickup coordinates
-2. Find the nearest available ambulance
-3. Score all hospitals using the dispatch ranking logic
-4. Pick the best recommendation
-5. Create a new emergency record
-6. Mark the assigned ambulance as dispatched
-7. Reserve hospital resources
-8. Push activity feed updates
-9. Return ranked hospital results and a dispatch timeline to the UI
+### Status Workflow
 
-### 5. Dashboard rendering
-
-- Page-level views consume shared state from `useSimulation()`
-- The command center, hospital dashboard, ambulance dashboard, AI finder, and admin panel all render from the same simulation source of truth
-- Charts are rendered with Recharts
-- UI state transitions and modals are animated with Framer Motion
-
-### 6. Mapping workflow
-
-- `src/components/LiveMap.tsx` renders Leaflet maps
-- Hospitals, ambulances, and emergencies are converted into map markers
-- Optional route comparison uses OSRM to estimate travel time and distance
-- Dark basemap tiles are loaded from CARTO
+- `pending`
+- `queued`
+- `assigned`
+- `in-transit`
+- `arrived`
+- `completed`
 
 ## Project Structure
 
 ```txt
 rapid-rescue-grid-main/
-├── public/                  # Static assets
+├── public/
+├── server/
+│   ├── data/
+│   └── src/
+│       ├── controllers/
+│       ├── db/
+│       ├── middleware/
+│       ├── models/
+│       ├── routes/
+│       ├── services/
+│       ├── utils/
+│       ├── app.ts
+│       └── server.ts
 ├── src/
-│   ├── components/          # Shared UI and domain components
-│   ├── contexts/            # Auth context
-│   ├── data/                # Seeded mock hospitals, ambulances, emergencies
-│   ├── hooks/               # Shared app state and utilities
-│   ├── pages/               # Route-level screens
-│   ├── test/                # Vitest setup and tests
-│   ├── App.tsx              # Router and provider composition
-│   └── main.tsx             # App entry point
-├── .env.example             # Demo-mode environment note
-├── package.json             # Scripts and dependencies
-├── tailwind.config.ts       # Tailwind theme setup
-├── vite.config.ts           # Vite configuration
-└── vitest.config.ts         # Test configuration
+│   ├── api/
+│   ├── components/
+│   ├── contexts/
+│   ├── data/
+│   ├── hooks/
+│   ├── integrations/
+│   ├── lib/
+│   ├── pages/
+│   ├── services/
+│   ├── test/
+│   ├── types/
+│   ├── App.tsx
+│   └── main.tsx
+├── index.html
+├── package.json
+├── vite.config.ts
+└── README.md
 ```
-
-## Notes
-
-- This version is a front-end demo with local state, not a production backend-integrated deployment
-- Emergency, fleet, and capacity updates are simulated in the browser for demonstration purposes
-- Routing quality depends on availability of the public OSRM service used by the live map

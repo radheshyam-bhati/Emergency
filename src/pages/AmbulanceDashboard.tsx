@@ -7,7 +7,8 @@ import { useMemo } from "react";
 
 const statusConfig: Record<string, { color: string; bg: string; glow: string }> = {
   available: { color: "text-stable", bg: "bg-stable/10", glow: "" },
-  dispatched: { color: "text-warning", bg: "bg-warning/10", glow: "glow-warning" },
+  queued: { color: "text-warning", bg: "bg-warning/10", glow: "glow-warning" },
+  assigned: { color: "text-warning", bg: "bg-warning/10", glow: "glow-warning" },
   "en-route": { color: "text-emergency", bg: "bg-emergency/10", glow: "glow-emergency" },
   "at-hospital": { color: "text-info", bg: "bg-info/10", glow: "" },
 };
@@ -47,7 +48,7 @@ const AmbulanceDashboard = () => {
 
       <div className="grid gap-3 sm:gap-4 md:grid-cols-2 xl:grid-cols-3">
         {ambulances.map((amb, i) => {
-          const cfg = statusConfig[amb.status];
+          const cfg = statusConfig[amb.status] ?? statusConfig.available;
           return (
             <motion.div
               key={amb.id}
@@ -84,14 +85,14 @@ const AmbulanceDashboard = () => {
                 </div>
               </div>
 
-              {amb.currentEmergency && (
+              {amb.currentEmergencyId && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
                   className="mt-3 rounded-lg bg-emergency/10 px-3 py-2 text-[10px] font-medium text-emergency flex items-center gap-1.5"
                 >
                   <Activity className="h-3 w-3 pulse-emergency" />
-                  Emergency #{amb.currentEmergency}
+                  Emergency #{amb.currentEmergencyId}
                 </motion.div>
               )}
             </motion.div>

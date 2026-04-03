@@ -6,7 +6,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 // ── Types ──
 interface MapHospital {
-  id: string;
+  id: string | number;
   name: string;
   lat: number;
   lng: number;
@@ -14,7 +14,7 @@ interface MapHospital {
 }
 
 interface MapAmbulance {
-  id: string;
+  id: string | number;
   vehicleNumber: string;
   lat: number;
   lng: number;
@@ -22,14 +22,14 @@ interface MapAmbulance {
 }
 
 interface MapEmergency {
-  id: string;
+  id: string | number;
   lat?: number;
   lng?: number;
   severity: string;
 }
 
 export interface RouteInfo {
-  hospitalId: string;
+  hospitalId: string | number;
   hospitalName: string;
   distanceKm: number;
   etaMinutes: number;
@@ -54,6 +54,8 @@ const statusColors: Record<string, string> = {
   critical: "hsl(0,85%,55%)",
   offline: "hsl(215,15%,55%)",
   available: "hsl(160,70%,45%)",
+  queued: "hsl(45,95%,55%)",
+  assigned: "hsl(45,95%,55%)",
   dispatched: "hsl(45,95%,55%)",
   "en-route": "hsl(0,85%,55%)",
   "at-hospital": "hsl(215,80%,50%)",
@@ -76,7 +78,7 @@ function hospitalIcon(status: string) {
 }
 
 function ambulanceIcon(status: string) {
-  const isActive = status !== "available" && status !== "at-hospital" && status !== "busy";
+  const isActive = !["available", "at-hospital", "busy"].includes(status);
   const bg = isActive ? "hsl(0,85%,55%)" : "hsl(220,15%,12%)";
   return makeIcon(
     `<div style="width:22px;height:22px;border-radius:50%;background:${bg};display:flex;align-items:center;justify-content:center;${isActive ? "box-shadow:0 0 12px hsl(0,85%,55%,0.5);" : ""}">
@@ -135,9 +137,9 @@ const LiveMap = ({
 }: LiveMapProps) => {
   const mapRef = useRef<L.Map | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const hospitalMarkersRef = useRef<Map<string, L.Marker>>(new Map());
-  const ambulanceMarkersRef = useRef<Map<string, L.Marker>>(new Map());
-  const emergencyMarkersRef = useRef<Map<string, L.Marker>>(new Map());
+  const hospitalMarkersRef = useRef<Map<string | number, L.Marker>>(new Map());
+  const ambulanceMarkersRef = useRef<Map<string | number, L.Marker>>(new Map());
+  const emergencyMarkersRef = useRef<Map<string | number, L.Marker>>(new Map());
   const routeLinesRef = useRef<L.Polyline[]>([]);
   const [routes, setRoutes] = useState<RouteInfo[]>([]);
 

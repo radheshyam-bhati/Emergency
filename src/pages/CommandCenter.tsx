@@ -5,31 +5,44 @@ import HospitalCard from "@/components/HospitalCard";
 import ActivityFeed from "@/components/ActivityFeed";
 import NewEmergencyForm from "@/components/NewEmergencyForm";
 import LiveMap from "@/components/LiveMap";
+import DecisionReplayPanel from "@/components/DecisionReplayPanel";
+import FallbackStrategyBanner from "@/components/FallbackStrategyBanner";
 import { useSimulation } from "@/hooks/useSimulation";
+import { getDispatch } from "@/api/dispatch";
+import { useAuth } from "@/contexts/AuthContext";
 import { AlertTriangle, Ambulance as AmbulanceIcon, Bed, Building2, Clock, Activity, TrendingDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, CartesianGrid, Tooltip } from "recharts";
 import { useMemo } from "react";
-
-const responseData = [
-  { t: "00:00", v: 9.2 }, { t: "02:00", v: 7.8 }, { t: "04:00", v: 6.1 },
-  { t: "06:00", v: 7.4 }, { t: "08:00", v: 11.3 }, { t: "10:00", v: 10.1 },
-  { t: "12:00", v: 8.7 }, { t: "14:00", v: 9.5 }, { t: "16:00", v: 12.1 },
-  { t: "18:00", v: 11.0 }, { t: "20:00", v: 10.5 }, { t: "22:00", v: 8.9 },
-  { t: "Now", v: 8.2 },
-];
+import { useQuery } from "@tanstack/react-query";
 
 const CommandCenter = () => {
-  const { hospitals, ambulances, emergencies, activity, realtimeConnected } = useSimulation();
+  const { profile } = useAuth();
+  const { hospitals, ambulances, emergencies, activity, metrics, realtimeConnected, loading } = useSimulation();
 
-  const activeEmergencies = emergencies.filter((e) => e.status !== "resolved");
-  const criticalCount = emergencies.filter((e) => e.severity === "critical").length;
-  const availableAmbulances = ambulances.filter((a) => a.status === "available").length;
-  const totalIcuAvailable = hospitals.reduce((sum, h) => sum + h.icuBeds.available, 0);
+  const activeEmergencies = emergencies.filter((e) => e.status !== "completed" && e.status !== "cancelled");
+  const criticalCount = activeEmergencies.filter((e) => e.severity === "critical").length;
+  const featuredEmergency = activeEmergencies.find((emergency) => emergency.dispatch) ?? activeEmergencies[0] ?? null;
+  const featuredDispatchQuery = useQuery({
+    queryKey: ["dispatch-detail", featuredEmergency?.id],
+    queryFn: () => getDispatch(featuredEmergency!.id),
+    enabled: Boolean(featuredEmergency?.dispatch),
+  });
 
   const mapHospitals = useMemo(() => hospitals.map((h) => ({ id: h.id, name: h.name, lat: h.lat, lng: h.lng, status: h.status })), [hospitals]);
   const mapAmbulances = useMemo(() => ambulances.map((a) => ({ id: a.id, vehicleNumber: a.vehicleNumber, lat: a.lat, lng: a.lng, status: a.status })), [ambulances]);
-  const mapEmergencies = useMemo(() => emergencies.filter(e => e.status !== "resolved").map((e, i) => ({ id: e.id, lat: 28.55 + (i * 0.015), lng: 77.15 + (i * 0.02), severity: e.severity })), [emergencies]);
+  const mapEmergencies = useMemo(
+    () =>
+      emergencies
+        .filter((emergency) => emergency.status !== "completed" && emergency.status !== "cancelled")
+        .map((emergency) => ({
+          id: emergency.id,
+          lat: emergency.pickupLatitude,
+          lng: emergency.pickupLongitude,
+          severity: emergency.severity,
+        })),
+    [emergencies],
+  );
 
   return (
     <DashboardLayout>
@@ -43,12 +56,12 @@ const CommandCenter = () => {
               realtimeConnected ? "bg-stable/10 text-stable" : "bg-muted text-muted-foreground"
             }`}>
               <span className={`h-1.5 w-1.5 rounded-full ${realtimeConnected ? "bg-stable" : "bg-muted-foreground"}`} />
-              {realtimeConnected ? "Realtime" : "Connecting..."}
+              {loading ? "Syncing..." : realtimeConnected ? "Realtime" : "Disconnected"}
             </span>
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <NewEmergencyForm />
+          {profile?.role !== "admin" && <NewEmergencyForm />}
           <div className="flex items-center gap-2 rounded-lg border border-emergency/30 bg-emergency/10 px-3 py-1.5">
             <span className="relative flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emergency opacity-75" />
@@ -60,11 +73,11 @@ const CommandCenter = () => {
       </div>
 
       {/* Stats Row */}
-      <div className="mb-4 grid grid-cols-2 gap-3 sm:mb-6 sm:gap-4 lg:grid-cols-4">
-        <StatCard label="Active Emergencies" value={activeEmergencies.length} icon={<AlertTriangle className="h-4 w-4 text-emergency" />} trend={`${criticalCount} critical`} variant="emergency" />
-        <StatCard label="Available Ambulances" value={`${availableAmbulances}/${ambulances.length}`} icon={<AmbulanceIcon className="h-4 w-4 text-info" />} trend="Fleet tracking active" variant="info" />
-        <StatCard label="ICU Beds Available" value={totalIcuAvailable} icon={<Bed className="h-4 w-4 text-warning" />} trend="Across 6 hospitals" />
-        <StatCard label="Avg Response Time" value="8.2m" icon={<Clock className="h-4 w-4 text-stable" />} trend="↓ 1.3m from last week" variant="stable" />
+        <div className="mb-4 grid grid-cols-2 gap-3 sm:mb-6 sm:gap-4 lg:grid-cols-4">
+        <StatCard label="Active Emergencies" value={metrics?.summary.activeEmergencies ?? activeEmergencies.length} icon={<AlertTriangle className="h-4 w-4 text-emergency" />} trend={`${criticalCount} critical`} variant="emergency" />
+        <StatCard label="Available Ambulances" value={`${metrics?.summary.availableAmbulances ?? 0}/${ambulances.length}`} icon={<AmbulanceIcon className="h-4 w-4 text-info" />} trend={`${metrics?.summary.busyAmbulances ?? 0} busy`} variant="info" />
+        <StatCard label="Avg Response Time" value={`${metrics?.summary.avgResponseMinutes ?? 0}m`} icon={<Clock className="h-4 w-4 text-stable" />} trend={`Dispatch delay ${metrics?.insights.avgDispatchDelay ?? 0}m`} variant="stable" />
+        <StatCard label="Efficiency Score" value={metrics?.insights.efficiencyScore ?? 0} icon={<Bed className="h-4 w-4 text-warning" />} trend={`${metrics?.insights.overloadedHospitals ?? 0} overloaded hospitals`} />
       </div>
 
       {/* Live Map */}
@@ -75,6 +88,23 @@ const CommandCenter = () => {
         className="mb-4 h-56 sm:mb-6 sm:h-72"
       />
 
+      {featuredDispatchQuery.data?.decision && (
+        <div className="mb-4 space-y-3 sm:mb-6">
+          {featuredDispatchQuery.data.decision.fallbackStrategy !== "nearest-available" && (
+            <FallbackStrategyBanner
+              fallbackStrategy={featuredDispatchQuery.data.decision.fallbackStrategy}
+              queueReason={featuredDispatchQuery.data.decision.queueReason}
+              retryCount={featuredDispatchQuery.data.dispatch?.retryCount ?? 0}
+            />
+          )}
+          <DecisionReplayPanel
+            decision={featuredDispatchQuery.data.decision}
+            compact
+            title="System Flow / Decision Replay"
+          />
+        </div>
+      )}
+
       <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
         {/* Emergencies Panel */}
         <div className="lg:col-span-1">
@@ -84,7 +114,7 @@ const CommandCenter = () => {
           </div>
           <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1 sm:max-h-[500px]">
             <AnimatePresence mode="popLayout">
-              {emergencies.map((e, i) => (
+              {activeEmergencies.map((e, i) => (
                 <EmergencyCard key={e.id} emergency={e} index={i} />
               ))}
             </AnimatePresence>
@@ -124,7 +154,7 @@ const CommandCenter = () => {
                 const statusColor =
                   a.status === "available" ? "text-stable" :
                   a.status === "en-route" ? "text-emergency" :
-                  a.status === "dispatched" ? "text-warning" : "text-info";
+                  a.status === "assigned" || a.status === "queued" ? "text-warning" : "text-info";
                 return (
                   <div key={a.id} className="flex items-center justify-between rounded-lg border border-border bg-card px-3 py-2">
                     <div>
@@ -149,7 +179,12 @@ const CommandCenter = () => {
             <span className="ml-auto text-[10px] text-muted-foreground">Target: &lt; 8 min</span>
           </div>
           <ResponsiveContainer width="100%" height={180}>
-            <AreaChart data={responseData}>
+            <AreaChart
+              data={(metrics?.responseTrend ?? []).map((point) => ({
+                t: point.label,
+                v: point.avgResponseMinutes,
+              }))}
+            >
               <defs>
                 <linearGradient id="respGrad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="hsl(0,85%,55%)" stopOpacity={0.3} />
@@ -171,10 +206,16 @@ const CommandCenter = () => {
             <h2 className="text-sm font-semibold">Incident Heatmap (24h)</h2>
           </div>
           <div className="grid grid-cols-8 gap-1">
-            {Array.from({ length: 48 }, (_, i) => {
-              const intensity = Math.random();
-              const bg = intensity > 0.7 ? "bg-emergency" : intensity > 0.4 ? "bg-warning" : intensity > 0.15 ? "bg-info/40" : "bg-muted";
-              return <div key={i} className={`aspect-square rounded-sm ${bg}`} title={`${Math.floor(i / 2)}:${i % 2 === 0 ? "00" : "30"}`} />;
+            {(metrics?.incidentHeatmap ?? []).map((bucket) => {
+              const bg =
+                bucket.count >= 3
+                  ? "bg-emergency"
+                  : bucket.count === 2
+                    ? "bg-warning"
+                    : bucket.count === 1
+                      ? "bg-info/40"
+                      : "bg-muted";
+              return <div key={bucket.label} className={`aspect-square rounded-sm ${bg}`} title={`${bucket.label} · ${bucket.count} incidents`} />;
             })}
           </div>
           <div className="mt-3 flex items-center justify-between text-[10px] text-muted-foreground">
