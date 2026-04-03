@@ -15,6 +15,7 @@ import HospitalFinder from "./pages/HospitalFinder";
 import LandingPage from "./pages/LandingPage";
 import NotFound from "./pages/NotFound";
 import PatientProfile from "./pages/PatientProfile";
+import SettingsPage from "./pages/SettingsPage";
 
 const queryClient = new QueryClient();
 
@@ -57,7 +58,7 @@ function App() {
                 <Route
                   path="/patients"
                   element={
-                    <ProtectedRoute>
+                    <ProtectedRoute requiredRole="admin">
                       <PatientProfile />
                     </ProtectedRoute>
                   }
@@ -75,6 +76,14 @@ function App() {
                   element={
                     <ProtectedRoute requiredRole="admin">
                       <AdminPanel />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/settings"
+                  element={
+                    <ProtectedRoute>
+                      <SettingsPage />
                     </ProtectedRoute>
                   }
                 />

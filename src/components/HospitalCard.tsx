@@ -1,4 +1,4 @@
-import { Hospital } from "@/data/mockData";
+import type { Hospital } from "@/types/domain";
 import { Building2, Users, Wind, Bed } from "lucide-react";
 
 const statusColors: Record<string, string> = {
