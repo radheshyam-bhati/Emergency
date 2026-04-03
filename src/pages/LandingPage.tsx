@@ -1,26 +1,26 @@
-import { Activity, Ambulance, Building2, Heart, MapPin, Shield, Users, Zap, ArrowRight, Phone, Brain, Clock, Bed } from "lucide-react";
+import { Activity, Ambulance, Building2, Heart, Shield, Users, Zap, ArrowRight, Phone, Brain, Bed } from "lucide-react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useRef } from "react";
 
 const stats = [
-  { label: "Hospitals Connected", value: "2,847", icon: Building2, color: "text-info" },
-  { label: "Ambulances Active", value: "12,340", icon: Ambulance, color: "text-stable" },
-  { label: "Lives Saved", value: "89,000+", icon: Heart, color: "text-emergency" },
-  { label: "Avg Response Time", value: "8.2 min", icon: Zap, color: "text-warning" },
+  { label: "Seeded Hospitals", value: "6", icon: Building2, color: "text-info" },
+  { label: "Live Ambulances", value: "6", icon: Ambulance, color: "text-stable" },
+  { label: "Tracked Workflows", value: "Queue + Dispatch", icon: Heart, color: "text-emergency" },
+  { label: "Explainable Decisions", value: "Replay Ready", icon: Zap, color: "text-warning" },
 ];
 
 const features = [
   { icon: Activity, title: "Real-Time Bed Tracking", description: "Live ICU, emergency, and general bed availability across all connected hospitals.", gradient: "from-emergency/20 to-critical/20" },
-  { icon: Brain, title: "AI-Powered Routing", description: "Smart hospital recommendation considering distance, traffic, specialization, and capacity.", gradient: "from-info/20 to-secondary/20" },
+  { icon: Brain, title: "SEAE Smart Dispatch", description: "Multi-factor hospital ranking across distance, bed capacity, specialization, doctor availability, and severity.", gradient: "from-info/20 to-secondary/20" },
   { icon: Users, title: "Doctor Availability", description: "Real-time tracking of specialist doctors across the network for critical cases.", gradient: "from-stable/20 to-accent/20" },
   { icon: Shield, title: "Automated Bed Reservation", description: "Instant bed allocation the moment an ambulance is dispatched to a hospital.", gradient: "from-warning/20 to-critical/20" },
 ];
 
 const workflow = [
   { step: "01", title: "Emergency Detected", desc: "Call received or alert triggered", icon: Phone, color: "text-emergency" },
-  { step: "02", title: "AI Scores Hospitals", desc: "Beds, doctors, distance, specialization", icon: Brain, color: "text-info" },
+  { step: "02", title: "SEAE Scores Hospitals", desc: "Distance, beds, doctors, specialization, severity", icon: Brain, color: "text-info" },
   { step: "03", title: "Ambulance Dispatched", desc: "Nearest available unit assigned", icon: Ambulance, color: "text-stable" },
   { step: "04", title: "Bed Reserved", desc: "Hospital prepared for arrival", icon: Bed, color: "text-warning" },
 ];
@@ -84,7 +84,7 @@ const LandingPage = () => {
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emergency opacity-75" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-emergency" />
               </span>
-              System Active — Monitoring 2,847 Hospitals
+              Demo Active — Regional emergency response network online
             </div>
           </motion.div>
 
@@ -104,12 +104,13 @@ const LandingPage = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
-            India's intelligent emergency hospital coordination platform. AI-powered routing
-            connects patients to the <span className="text-foreground font-medium">best hospital</span> — not just the nearest one.
+            A hackathon-ready emergency coordination system where a real backend, persistent data,
+            and the <span className="text-foreground font-medium">Smart Emergency Allocation Engine</span>
+            decide where each case should go.
           </motion.p>
 
           <motion.div
-            className="mt-8 flex flex-col items-center gap-3 sm:mt-10 sm:flex-row sm:gap-4"
+            className="mt-8 flex flex-col items-center justify-center gap-3 sm:mt-10 sm:flex-row sm:gap-4"
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3 }}
@@ -135,9 +136,9 @@ const LandingPage = () => {
             transition={{ delay: 0.6 }}
           >
             {[
-              { label: "Active Emergencies", value: "47", color: "text-emergency" },
-              { label: "Ambulances En-Route", value: "23", color: "text-warning" },
-              { label: "ICU Beds Free", value: "312", color: "text-stable" },
+              { label: "Tracked Emergencies", value: "Live", color: "text-emergency" },
+              { label: "Queued Fallbacks", value: "Visible", color: "text-warning" },
+              { label: "Explainable Ranking", value: "Top 3", color: "text-stable" },
             ].map((item) => (
               <div key={item.label} className="text-center">
                 <div className={`font-mono text-2xl font-bold ${item.color} animate-count-up`}>{item.value}</div>
@@ -183,7 +184,7 @@ const LandingPage = () => {
             viewport={{ once: true }}
           >
             <h2 className="text-3xl font-bold sm:text-4xl">How It Works</h2>
-            <p className="mt-4 text-muted-foreground">From emergency call to hospital arrival in under 8 minutes</p>
+            <p className="mt-4 text-muted-foreground">From emergency intake to explainable dispatch with queue-aware fallback handling.</p>
           </motion.div>
 
           <div className="grid gap-4 md:grid-cols-4">
@@ -222,7 +223,7 @@ const LandingPage = () => {
             viewport={{ once: true }}
           >
             <h2 className="text-3xl font-bold sm:text-4xl">Intelligent Emergency Coordination</h2>
-            <p className="mt-4 text-muted-foreground">Beyond simple dispatch — a complete emergency operations platform.</p>
+            <p className="mt-4 text-muted-foreground">Built for demo impact: persistent state, explainable decisions, and credible operations views.</p>
           </motion.div>
 
           <div className="grid gap-6 md:grid-cols-2">
@@ -259,8 +260,8 @@ const LandingPage = () => {
             viewport={{ once: true }}
             className="mx-auto max-w-2xl"
           >
-            <h2 className="text-3xl font-bold sm:text-4xl">Ready to Transform Emergency Response?</h2>
-            <p className="mt-4 text-muted-foreground">Join the network saving thousands of lives across India.</p>
+            <h2 className="text-3xl font-bold sm:text-4xl">Ready to Explore the Full Dispatch Workflow?</h2>
+            <p className="mt-4 text-muted-foreground">Sign in as an admin or dispatcher and test the SEAE allocation flow end to end.</p>
             <div className="mt-8 flex items-center justify-center gap-4">
               <Link to="/auth">
                 <Button size="lg" className="bg-emergency text-emergency-foreground hover:bg-emergency/90 glow-emergency h-12 px-8">

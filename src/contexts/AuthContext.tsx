@@ -1,18 +1,15 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { getCurrentUser, login, signUp as apiSignUp } from "@/api/auth";
+import type { AuthSession, AuthUser } from "@/types/domain";
 
 export interface AuthError {
   message: string;
 }
 
-export interface AuthUser {
-  id: string;
-  email: string;
-}
-
 export interface AuthProfile {
   email: string;
   fullName: string;
-  role: "admin";
+  role: "admin" | "dispatcher";
 }
 
 interface AuthResponse {
@@ -24,26 +21,30 @@ interface AuthContextType {
   profile: AuthProfile | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<AuthResponse>;
+  signUp: (email: string, password: string, fullName: string, role: string) => Promise<AuthResponse>;
   signOut: () => Promise<void>;
 }
 
-const ADMIN_EMAIL = "admin@gmail.com";
-const ADMIN_PASSWORD = "admin@123";
-const STORAGE_KEY = "rapid-rescue-grid-auth";
+const TOKEN_KEY = "rapid-rescue-grid-token";
+const SESSION_KEY = "rapid-rescue-grid-session";
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-const createAdminSession = (): { profile: AuthProfile; user: AuthUser } => ({
-  user: {
-    id: "local-admin",
-    email: ADMIN_EMAIL,
-  },
-  profile: {
-    email: ADMIN_EMAIL,
-    fullName: "System Administrator",
-    role: "admin",
-  },
+const toProfile = (user: AuthUser): AuthProfile => ({
+  email: user.email,
+  fullName: user.fullName,
+  role: user.role,
 });
+
+const persistSession = (session: AuthSession) => {
+  window.localStorage.setItem(TOKEN_KEY, session.token);
+  window.localStorage.setItem(SESSION_KEY, JSON.stringify(session.user));
+};
+
+const clearSession = () => {
+  window.localStorage.removeItem(TOKEN_KEY);
+  window.localStorage.removeItem(SESSION_KEY);
+};
 
 export function useAuth() {
   const context = useContext(AuthContext);
@@ -61,41 +62,84 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedValue = window.localStorage.getItem(STORAGE_KEY);
+    const storedSession = window.localStorage.getItem(SESSION_KEY);
+    const token = window.localStorage.getItem(TOKEN_KEY);
 
-    if (storedValue === ADMIN_EMAIL) {
-      const adminSession = createAdminSession();
-      setUser(adminSession.user);
-      setProfile(adminSession.profile);
+    if (!storedSession || !token) {
+      setLoading(false);
+      return;
     }
 
-    setLoading(false);
+    try {
+      const parsedUser = JSON.parse(storedSession) as AuthUser;
+      setUser(parsedUser);
+      setProfile(toProfile(parsedUser));
+
+      getCurrentUser()
+        .then(({ user: currentUser }) => {
+          setUser(currentUser);
+          setProfile(toProfile(currentUser));
+          window.localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
+        })
+        .catch(() => {
+          clearSession();
+          setUser(null);
+          setProfile(null);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    } catch {
+      clearSession();
+      setLoading(false);
+    }
   }, []);
 
   async function signIn(email: string, password: string): Promise<AuthResponse> {
-    const normalizedEmail = email.trim().toLowerCase();
-
-    if (normalizedEmail !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
+    try {
+      const session = await login(email, password);
+      persistSession(session);
+      setUser(session.user);
+      setProfile(toProfile(session.user));
+      return { error: null };
+    } catch (error) {
+      clearSession();
       return {
         error: {
-          message: "Use admin@gmail.com with password admin@123.",
+          message:
+            error instanceof Error
+              ? error.message
+              : "Unable to sign in with the provided credentials.",
         },
       };
     }
+  }
 
-    const adminSession = createAdminSession();
-    window.localStorage.setItem(STORAGE_KEY, ADMIN_EMAIL);
-    setUser(adminSession.user);
-    setProfile(adminSession.profile);
-
-    return { error: null };
+  async function signUp(email: string, password: string, fullName: string, role: string): Promise<AuthResponse> {
+    try {
+      const session = await apiSignUp(email, password, fullName, role);
+      persistSession(session);
+      setUser(session.user);
+      setProfile(toProfile(session.user));
+      return { error: null };
+    } catch (error) {
+      clearSession();
+      return {
+        error: {
+          message:
+            error instanceof Error
+              ? error.message
+              : "Unable to sign up with the provided details.",
+        },
+      };
+    }
   }
 
   async function signOut() {
-    window.localStorage.removeItem(STORAGE_KEY);
+    clearSession();
     setUser(null);
     setProfile(null);
   }
 
-  return <AuthContext.Provider value={{ user, profile, loading, signIn, signOut }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{ user, profile, loading, signIn, signUp, signOut }}>{children}</AuthContext.Provider>;
 }

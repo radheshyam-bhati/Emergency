@@ -1,4 +1,3 @@
-import { ActivityEvent } from "@/data/mockData";
 import { AlertTriangle, Ambulance, Building2, CheckCircle, Bed } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -7,14 +6,21 @@ const eventConfig: Record<string, { icon: React.ElementType; color: string }> = 
   dispatch: { icon: Ambulance, color: "text-info" },
   arrival: { icon: Building2, color: "text-stable" },
   "bed-reserved": { icon: Bed, color: "text-warning" },
+  completed: { icon: CheckCircle, color: "text-stable" },
   resolved: { icon: CheckCircle, color: "text-stable" },
+  status: { icon: Ambulance, color: "text-info" },
+  queued: { icon: AlertTriangle, color: "text-warning" },
 };
 
-const ActivityFeed = ({ events }: { events: ActivityEvent[] }) => {
+const ActivityFeed = ({
+  events,
+}: {
+  events: Array<{ id: number | string; type: string; message: string; timestamp: string }>;
+}) => {
   return (
     <div className="space-y-1">
       {events.map((event, i) => {
-        const config = eventConfig[event.type];
+        const config = eventConfig[event.type] ?? eventConfig.dispatch;
         const Icon = config.icon;
         return (
           <motion.div

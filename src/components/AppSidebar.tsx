@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Heart, LayoutDashboard, Building2, Ambulance, Activity, ArrowLeft, Users, MapPin, Shield, LogOut, Menu } from "lucide-react";
+import { Heart, LayoutDashboard, Building2, Ambulance, Activity, ArrowLeft, Users, MapPin, Shield, LogOut, Menu, Settings } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -11,6 +11,7 @@ const navItems = [
   { to: "/patients", label: "Patient Records", icon: Users },
   { to: "/finder", label: "Hospital Finder", icon: MapPin },
   { to: "/admin", label: "Admin Panel", icon: Shield },
+  { to: "/settings", label: "Settings", icon: Settings },
 ];
 
 const SidebarContent = ({ onNavigate }: { onNavigate?: () => void }) => {
@@ -37,6 +38,8 @@ const SidebarContent = ({ onNavigate }: { onNavigate?: () => void }) => {
 
       <nav className="flex-1 space-y-0.5 p-2">
         {navItems.map((item) => {
+          if (item.to === "/patients" && profile?.role !== "admin") return null;
+          if (item.to === "/admin" && profile?.role !== "admin") return null; // already implicitly hidden or handled? Actually let's hide admin menu as well just in case, but keep focus on patients
           const isActive = location.pathname === item.to;
           return (
             <Link

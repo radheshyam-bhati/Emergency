@@ -2,8 +2,8 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { useSimulation } from "@/hooks/useSimulation";
 import { motion } from "framer-motion";
 import {
-  Shield, Building2, Ambulance, Users, Activity, AlertTriangle,
-  Clock, TrendingUp, TrendingDown, Bed, FileText,
+  Shield, Building2, Ambulance, Activity, AlertTriangle,
+  Clock, TrendingDown, Bed, FileText,
 } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -13,51 +13,26 @@ import {
 const COLORS = ["hsl(0,85%,55%)", "hsl(25,95%,55%)", "hsl(160,70%,45%)", "hsl(215,80%,50%)"];
 
 const AdminPanel = () => {
-  const { hospitals, ambulances, emergencies, activity } = useSimulation();
+  const { hospitals, ambulances, emergencies, activity, metrics } = useSimulation();
 
-  const statusCounts = {
-    operational: hospitals.filter((h) => h.status === "operational").length,
-    highLoad: hospitals.filter((h) => h.status === "high-load").length,
-    critical: hospitals.filter((h) => h.status === "critical").length,
-    offline: hospitals.filter((h) => h.status === "offline").length,
-  };
-
-  const ambulanceStatusData = [
-    { name: "Available", value: ambulances.filter((a) => a.status === "available").length },
-    { name: "Dispatched", value: ambulances.filter((a) => a.status === "dispatched").length },
-    { name: "En-Route", value: ambulances.filter((a) => a.status === "en-route").length },
-    { name: "At Hospital", value: ambulances.filter((a) => a.status === "at-hospital").length },
-  ];
-
-  const hospitalCapacity = hospitals.map((h) => ({
-    name: h.name.split(" ")[0],
-    icu: h.icuBeds.available,
-    emergency: h.emergencyBeds.available,
-    general: h.generalBeds.available,
-  }));
-
-  const responseTimeData = [
-    { time: "00:00", avg: 9.2 },
-    { time: "04:00", avg: 6.1 },
-    { time: "08:00", avg: 11.3 },
-    { time: "12:00", avg: 8.7 },
-    { time: "16:00", avg: 12.1 },
-    { time: "20:00", avg: 10.5 },
-    { time: "Now", avg: 8.2 },
-  ];
-
-  const emergencySeverity = [
-    { name: "Critical", value: emergencies.filter((e) => e.severity === "critical").length },
-    { name: "Serious", value: emergencies.filter((e) => e.severity === "serious").length },
-    { name: "Moderate", value: emergencies.filter((e) => e.severity === "moderate").length },
-    { name: "Minor", value: emergencies.filter((e) => e.severity === "minor").length },
-  ];
+  const ambulanceStatusData = metrics?.fleetStatus ?? [];
+  const hospitalCapacity =
+    metrics?.hospitalCapacity.map((hospital) => ({
+      name: hospital.name.split(" ")[0],
+      icu: hospital.icu,
+      emergency: hospital.emergency,
+      general: hospital.general,
+    })) ?? [];
+  const responseTimeData =
+    metrics?.responseTrend.map((point) => ({
+      time: point.label,
+      avg: point.avgResponseMinutes,
+    })) ?? [];
+  const emergencySeverity = metrics?.severityBreakdown ?? [];
 
   const roles = [
-    { role: "Admin", count: 3, icon: Shield },
-    { role: "Hospital Staff", count: 847, icon: Building2 },
-    { role: "Ambulance Crew", count: 234, icon: Ambulance },
-    { role: "Doctors", count: 1200, icon: Users },
+    { role: "Admin", access: "Full analytics, configuration, and audit visibility", icon: Shield },
+    { role: "Dispatcher", access: "Create emergencies, run SEAE, and assign ambulances", icon: Ambulance },
   ];
 
   return (
@@ -77,9 +52,9 @@ const AdminPanel = () => {
       <div className="mb-4 grid grid-cols-2 gap-3 sm:mb-6 sm:gap-4 lg:grid-cols-4">
         {[
           { label: "Total Hospitals", value: hospitals.length, icon: Building2, color: "text-info" },
-          { label: "Active Ambulances", value: ambulances.length, icon: Ambulance, color: "text-stable" },
-          { label: "Active Emergencies", value: emergencies.filter((e) => e.status !== "resolved").length, icon: AlertTriangle, color: "text-emergency" },
-          { label: "Avg Response", value: "8.2m", icon: Clock, color: "text-warning" },
+          { label: "Active Ambulances", value: metrics?.summary.availableAmbulances ?? ambulances.length, icon: Ambulance, color: "text-stable" },
+          { label: "Active Emergencies", value: metrics?.summary.activeEmergencies ?? emergencies.filter((e) => e.status !== "completed" && e.status !== "cancelled").length, icon: AlertTriangle, color: "text-emergency" },
+          { label: "Avg Response", value: `${metrics?.summary.avgResponseMinutes ?? 0}m`, icon: Clock, color: "text-warning" },
         ].map((stat, i) => (
           <motion.div
             key={stat.label}
@@ -174,6 +149,16 @@ const AdminPanel = () => {
                 </div>
               ))}
             </div>
+            <div className="mt-4 grid grid-cols-2 gap-3 text-left">
+              <div className="rounded-lg border border-border px-3 py-3">
+                <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Efficiency Score</div>
+                <div className="mt-1 font-mono text-xl font-bold">{metrics?.insights.efficiencyScore ?? 0}</div>
+              </div>
+              <div className="rounded-lg border border-border px-3 py-3">
+                <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Success Rate</div>
+                <div className="mt-1 font-mono text-xl font-bold">{metrics?.insights.successRate ?? 0}%</div>
+              </div>
+            </div>
           </div>
 
           <div className="rounded-xl border border-border bg-card p-4 sm:p-5">
@@ -182,12 +167,12 @@ const AdminPanel = () => {
             </h3>
             <div className="space-y-2">
               {roles.map((r) => (
-                <div key={r.role} className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
+                <div key={r.role} className="rounded-lg border border-border px-3 py-2">
                   <div className="flex items-center gap-2">
                     <r.icon className="h-4 w-4 text-muted-foreground" />
                     <span className="text-xs font-medium">{r.role}</span>
                   </div>
-                  <span className="font-mono text-xs font-bold">{r.count}</span>
+                  <p className="mt-1 text-[11px] text-muted-foreground">{r.access}</p>
                 </div>
               ))}
             </div>

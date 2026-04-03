@@ -6,9 +6,10 @@ export default defineConfig({
   plugins: [react()],
   test: {
     environment: "jsdom",
+    fileParallelism: false,
     globals: true,
     setupFiles: ["./src/test/setup.ts"],
-    include: ["src/**/*.{test,spec}.{ts,tsx}"],
+    include: ["src/**/*.{test,spec}.{ts,tsx}", "server/src/**/*.{test,spec}.{ts,tsx}"],
   },
   resolve: {
     alias: { "@": path.resolve(__dirname, "./src") },

@@ -1,26 +1,36 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Heart, Lock, Mail, Shield } from "lucide-react";
+import { Heart, Lock, Mail, Shield, User, Briefcase, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
-const DEFAULT_EMAIL = "admin@gmail.com";
-const DEFAULT_PASSWORD = "admin@123";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const AuthPage = () => {
-  const [email, setEmail] = useState(DEFAULT_EMAIL);
-  const [password, setPassword] = useState(DEFAULT_PASSWORD);
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [role, setRole] = useState("dispatcher");
   const [loading, setLoading] = useState(false);
-  const { signIn } = useAuth();
+  const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setLoading(true);
 
-    const { error } = await signIn(email, password);
+    let error;
+
+    if (isSignUp) {
+      const res = await signUp(email, password, fullName, role);
+      error = res.error;
+    } else {
+      const res = await signIn(email, password);
+      error = res.error;
+    }
 
     if (error) {
       toast.error(error.message);
@@ -28,7 +38,7 @@ const AuthPage = () => {
       return;
     }
 
-    toast.success("Signed in as administrator");
+    toast.success(isSignUp ? "Account created and signed in" : "Signed in successfully");
     navigate("/command-center");
     setLoading(false);
   };
@@ -41,7 +51,7 @@ const AuthPage = () => {
             <Heart className="h-7 w-7 text-emergency-foreground" />
           </div>
           <h1 className="text-2xl font-bold">Emergency Hospital Network</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Sign in with the local administrator account.</p>
+          <p className="mt-1 text-sm text-muted-foreground">{isSignUp ? "Sign up to access the live control room." : "Sign in as an admin or dispatcher to access the live control room."}</p>
         </div>
 
         <div className="rounded-xl border border-emergency/20 bg-emergency/5 p-4">
@@ -50,14 +60,49 @@ const AuthPage = () => {
               <Shield className="h-4 w-4" />
             </div>
             <div>
-              <p className="text-sm font-semibold">Admin Login</p>
-              <p className="mt-1 text-xs text-muted-foreground">Email: admin@gmail.com</p>
-              <p className="text-xs text-muted-foreground">Password: admin@123</p>
+              <p className="text-sm font-semibold">Authenticated Control Room Access</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Use your provisioned operator credentials to enter the live emergency coordination workspace.
+              </p>
             </div>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 rounded-xl border border-border bg-card p-6">
+          {isSignUp && (
+            <>
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Full Name</label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    type="text"
+                    value={fullName}
+                    onChange={(event) => setFullName(event.target.value)}
+                    placeholder="Enter full name"
+                    className="pl-10"
+                    required={isSignUp}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Role</label>
+                <div className="relative">
+                  <Briefcase className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground z-10" />
+                  <Select value={role} onValueChange={setRole} required={isSignUp}>
+                    <SelectTrigger className="pl-10">
+                      <SelectValue placeholder="Select role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="dispatcher">Dispatcher</SelectItem>
+                      <SelectItem value="admin">Administrator</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </>
+          )}
           <div>
             <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Email</label>
             <div className="relative">
@@ -66,7 +111,7 @@ const AuthPage = () => {
                 type="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                placeholder="admin@gmail.com"
+                placeholder="operator@network.example"
                 className="pl-10"
                 required
               />
@@ -74,23 +119,55 @@ const AuthPage = () => {
           </div>
 
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Password</label>
+            <div className="mb-1.5 flex items-center justify-between">
+              <label className="block text-xs font-medium text-muted-foreground">Password</label>
+              {!isSignUp && (
+                <button
+                  type="button"
+                  className="text-xs font-medium text-emergency hover:underline"
+                  onClick={() => toast.info("Password recovery feature coming soon")}
+                >
+                  Forgot password?
+                </button>
+              )}
+            </div>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
-                placeholder="admin@123"
-                className="pl-10"
+                placeholder="Enter your password"
+                className="pl-10 pr-10"
                 required
               />
+              <button
+                type="button"
+                className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
             </div>
           </div>
 
           <Button type="submit" className="w-full bg-emergency text-emergency-foreground hover:bg-emergency/90" disabled={loading}>
-            {loading ? "Please wait..." : "Sign In"}
+            {loading ? "Please wait..." : isSignUp ? "Sign Up" : "Sign In"}
           </Button>
+          
+          <div className="text-center text-sm pt-2">
+            <span className="text-muted-foreground">
+              {isSignUp ? "Already have an account?" : "Don't have an account?"}
+            </span>{" "}
+            <button
+              type="button"
+              className="font-medium text-emergency hover:underline"
+              onClick={() => setIsSignUp(!isSignUp)}
+            >
+              {isSignUp ? "Sign In" : "Sign Up"}
+            </button>
+          </div>
         </form>
       </div>
     </div>
