@@ -37,7 +37,7 @@ work. For a new idea, open a feature request before writing a large change.
 ### Install and run
 
 ```sh
-git clone https://github.com/radheshyam-bhati/Emergency.git
+git clone https://github.com/radheshyam-bhati/VAGRHUB.git
 cd Emergency
 npm ci
 cp .env.example .env

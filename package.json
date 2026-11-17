@@ -6,12 +6,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/radheshyam-bhati/Emergency.git"
+    "url": "git+https://github.com/radheshyam-bhati/VAGRHUB.git"
   },
   "bugs": {
-    "url": "https://github.com/radheshyam-bhati/Emergency/issues"
+    "url": "https://github.com/radheshyam-bhati/VAGRHUB/issues"
   },
-  "homepage": "https://github.com/radheshyam-bhati/Emergency#readme",
+  "homepage": "https://github.com/radheshyam-bhati/VAGRHUB#readme",
   "type": "module",
   "engines": {
     "node": ">=22 <25",

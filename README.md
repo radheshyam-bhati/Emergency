@@ -5,8 +5,8 @@
 > **not** medical advice, and must **not** be used with real patient data.
 > See [docs/DATA_DISCLAIMER.md](docs/DATA_DISCLAIMER.md).
 
-[![CI](https://github.com/radheshyam-bhati/Emergency/actions/workflows/ci.yml/badge.svg)](https://github.com/radheshyam-bhati/Emergency/actions/workflows/ci.yml)
-[![CodeQL](https://github.com/radheshyam-bhati/Emergency/actions/workflows/codeql.yml/badge.svg)](https://github.com/radheshyam-bhati/Emergency/actions/workflows/codeql.yml)
+[![CI](https://github.com/radheshyam-bhati/VAGRHUB/actions/workflows/ci.yml/badge.svg)](https://github.com/radheshyam-bhati/VAGRHUB/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/radheshyam-bhati/VAGRHUB/actions/workflows/codeql.yml/badge.svg)](https://github.com/radheshyam-bhati/VAGRHUB/actions/workflows/codeql.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 Rapid Rescue Grid is a full-stack simulation of an emergency dispatch command
@@ -60,7 +60,7 @@ bcryptjs.
 ### Setup
 
 ```sh
-git clone https://github.com/radheshyam-bhati/Emergency.git
+git clone https://github.com/radheshyam-bhati/VAGRHUB.git
 cd Emergency
 npm ci
 cp .env.example .env

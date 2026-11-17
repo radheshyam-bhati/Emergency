@@ -2,7 +2,7 @@
 
 ## Questions and ideas
 
-Use [GitHub Discussions](https://github.com/radheshyam-bhati/Emergency/discussions)
+Use [GitHub Discussions](https://github.com/radheshyam-bhati/VAGRHUB/discussions)
 for questions, setup help, and design ideas. If Discussions is unavailable, open
 a feature request issue.
 

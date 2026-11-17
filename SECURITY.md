@@ -13,7 +13,7 @@ Please **do not open a public issue** for a security vulnerability.
 
 Use GitHub private vulnerability reporting:
 
-https://github.com/radheshyam-bhati/Emergency/security/advisories/new
+https://github.com/radheshyam-bhati/VAGRHUB/security/advisories/new
 
 If private reporting is unavailable, contact the maintainer privately through
 the contact method on their GitHub profile.

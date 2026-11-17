@@ -9,7 +9,7 @@
 ## First-time setup
 
 ```sh
-git clone https://github.com/radheshyam-bhati/Emergency.git
+git clone https://github.com/radheshyam-bhati/VAGRHUB.git
 cd Emergency
 npm ci
 cp .env.example .env
