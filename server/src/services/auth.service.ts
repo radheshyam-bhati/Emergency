@@ -1,18 +1,16 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { userModel } from "../models/user.model.js";
+import { env } from "../config/env.js";
 
-const JWT_SECRET = process.env.JWT_SECRET;
-
-if (!JWT_SECRET) {
-  throw new Error("JWT_SECRET must be configured before starting the API");
-}
+const TOKEN_TTL = "12h";
+const BCRYPT_ROUNDS = 12;
 
 export const authService = {
-  login(email: string, password: string) {
+  async login(email: string, password: string) {
     const user = userModel.findByEmail(email.trim().toLowerCase());
 
-    if (!user || !bcrypt.compareSync(password, user.passwordHash)) {
+    if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
       return null;
     }
 
@@ -22,8 +20,8 @@ export const authService = {
         role: user.role,
         email: user.email,
       },
-      JWT_SECRET,
-      { expiresIn: "12h" },
+      env.JWT_SECRET,
+      { expiresIn: TOKEN_TTL, algorithm: "HS256" },
     );
 
     return {
@@ -38,20 +36,22 @@ export const authService = {
   },
 
   verify(token: string) {
-    return jwt.verify(token, JWT_SECRET) as unknown as {
+    return jwt.verify(token, env.JWT_SECRET, {
+      algorithms: ["HS256"],
+    }) as unknown as {
       sub: number;
       role: "admin" | "dispatcher";
       email: string;
     };
   },
 
-  signup(email: string, password: string, fullName: string, role: string) {
+  async signup(email: string, password: string, fullName: string, role: "admin" | "dispatcher") {
     const existing = userModel.findByEmail(email.trim().toLowerCase());
     if (existing) {
-      return null; // Or throw error
+      return null;
     }
 
-    const passwordHash = bcrypt.hashSync(password, 10);
+    const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
     const user = userModel.create(email.trim().toLowerCase(), passwordHash, fullName, role);
 
     const token = jwt.sign(
@@ -60,8 +60,8 @@ export const authService = {
         role: user.role,
         email: user.email,
       },
-      JWT_SECRET,
-      { expiresIn: "12h" },
+      env.JWT_SECRET,
+      { expiresIn: TOKEN_TTL, algorithm: "HS256" },
     );
 
     return {

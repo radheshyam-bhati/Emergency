@@ -3,7 +3,12 @@ import { readModelService } from "../services/read-model.service.js";
 
 export const activityController = {
   list(request: Request, response: Response) {
-    const limit = Number(request.query.limit ?? 20);
-    return response.json(readModelService.listActivity(Number.isFinite(limit) ? limit : 20));
+    const requestedLimit = Number(request.query.limit ?? 20);
+    const limit = Math.min(
+      Math.max(Number.isFinite(requestedLimit) ? requestedLimit : 20, 1),
+      100,
+    );
+
+    return response.json(readModelService.listActivity(limit));
   },
 };

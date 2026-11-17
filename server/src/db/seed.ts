@@ -1,3 +1,5 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { getDb, resetDb } from "./client.js";
 import {
   seedActivityLogs,
@@ -151,7 +153,11 @@ export const seedDatabase = ({ reset = false }: { reset?: boolean } = {}) => {
   seedTransaction();
 };
 
-if (process.argv[1]?.includes("seed.js")) {
+const invokedDirectly =
+  process.argv[1] !== undefined &&
+  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+
+if (invokedDirectly) {
   seedDatabase({ reset: process.argv.includes("--reset") });
   console.log("Database seeded");
 }
