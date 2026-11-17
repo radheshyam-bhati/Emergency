@@ -4,17 +4,30 @@ import { nowIso } from "../utils/time.js";
 
 const timestamp = nowIso();
 
+const demoEmail = (envName: string, fallback: string) =>
+  process.env[envName]?.trim() || fallback;
+
+const demoPassword = (envName: string) => {
+  const value = process.env[envName];
+
+  if (!value) {
+    throw new Error(`${envName} must be set before seeding demo data`);
+  }
+
+  return value;
+};
+
 export const seedUsers = [
   {
-    email: "admin@gmail.com",
-    passwordHash: bcrypt.hashSync("admin@123", 8),
+    email: demoEmail("DEMO_ADMIN_EMAIL", "admin@example.com"),
+    passwordHash: bcrypt.hashSync(demoPassword("DEMO_ADMIN_PASSWORD"), 12),
     fullName: "System Administrator",
     role: "admin" as const,
     createdAt: timestamp,
   },
   {
-    email: "dispatcher@gmail.com",
-    passwordHash: bcrypt.hashSync("dispatch@123", 8),
+    email: demoEmail("DEMO_DISPATCHER_EMAIL", "dispatcher@example.com"),
+    passwordHash: bcrypt.hashSync(demoPassword("DEMO_DISPATCHER_PASSWORD"), 12),
     fullName: "Duty Dispatcher",
     role: "dispatcher" as const,
     createdAt: timestamp,
@@ -23,7 +36,7 @@ export const seedUsers = [
 
 export const seedHospitals = [
   {
-    name: "AIIMS New Delhi",
+    name: "North Ridge Medical Center",
     location: "Ansari Nagar, New Delhi",
     lat: 28.5672,
     lng: 77.21,
@@ -43,7 +56,7 @@ export const seedHospitals = [
     specializations: ["Cardiology", "Neurology", "Trauma", "Burns"],
   },
   {
-    name: "Safdarjung Hospital",
+    name: "City General Hospital",
     location: "Ring Road, New Delhi",
     lat: 28.5685,
     lng: 77.2065,
@@ -63,7 +76,7 @@ export const seedHospitals = [
     specializations: ["Orthopedics", "General Surgery", "Trauma"],
   },
   {
-    name: "Max Super Specialty",
+    name: "Lakeview Multispecialty",
     location: "Saket, New Delhi",
     lat: 28.5275,
     lng: 77.2137,
@@ -83,7 +96,7 @@ export const seedHospitals = [
     specializations: ["Cardiology", "Oncology", "Neurosurgery"],
   },
   {
-    name: "Fortis Escorts",
+    name: "Sunrise Heart Institute",
     location: "Okhla Road, New Delhi",
     lat: 28.5503,
     lng: 77.259,
@@ -103,7 +116,7 @@ export const seedHospitals = [
     specializations: ["Cardiology", "Cardiac Surgery", "Vascular Surgery"],
   },
   {
-    name: "Sir Ganga Ram Hospital",
+    name: "Green Park Trauma Center",
     location: "Rajinder Nagar, New Delhi",
     lat: 28.638,
     lng: 77.188,
@@ -123,7 +136,7 @@ export const seedHospitals = [
     specializations: ["Gastroenterology", "Nephrology", "Pulmonology"],
   },
   {
-    name: "Apollo Hospital",
+    name: "Metro Care Hospital",
     location: "Mathura Road, New Delhi",
     lat: 28.544,
     lng: 77.282,
@@ -316,6 +329,6 @@ export const seedActivityLogs = [
     entityType: "dispatch",
     entityId: 1,
     eventType: "bed-reserved",
-    message: "Critical care capacity reserved at AIIMS New Delhi",
+    message: "Critical care capacity reserved at North Ridge Medical Center",
   },
 ];
