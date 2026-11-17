@@ -7,10 +7,10 @@ export const login = (email: string, password: string) =>
     body: { email, password },
   });
 
-export const signUp = (email: string, password: string, fullName: string, role: string) =>
+export const signUp = (email: string, password: string, fullName: string) =>
   apiRequest<AuthSession>("/auth/signup", {
     method: "POST",
-    body: { email, password, fullName, role },
+    body: { email, password, fullName },
   });
 
 export const getCurrentUser = () => apiRequest<{ user: AuthUser }>("/auth/me");
