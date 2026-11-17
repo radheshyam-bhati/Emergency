@@ -1,0 +1,10 @@
+# Default owners
+* @radheshyam-bhati
+
+# Security-sensitive areas
+/server/src/controllers/auth.controller.ts @radheshyam-bhati
+/server/src/services/auth.service.ts @radheshyam-bhati
+/server/src/middleware/auth.middleware.ts @radheshyam-bhati
+/server/src/config/ @radheshyam-bhati
+/.github/workflows/ @radheshyam-bhati
+/SECURITY.md @radheshyam-bhati

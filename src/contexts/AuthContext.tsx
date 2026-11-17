@@ -21,7 +21,7 @@ interface AuthContextType {
   profile: AuthProfile | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<AuthResponse>;
-  signUp: (email: string, password: string, fullName: string, role: string) => Promise<AuthResponse>;
+  signUp: (email: string, password: string, fullName: string) => Promise<AuthResponse>;
   signOut: () => Promise<void>;
 }
 
@@ -60,6 +60,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [profile, setProfile] = useState<AuthProfile | null>(null);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const handleUnauthorized = () => {
+      clearSession();
+      setUser(null);
+      setProfile(null);
+    };
+
+    window.addEventListener("auth:unauthorized", handleUnauthorized);
+
+    return () => {
+      window.removeEventListener("auth:unauthorized", handleUnauthorized);
+    };
+  }, []);
 
   useEffect(() => {
     const storedSession = window.localStorage.getItem(SESSION_KEY);
@@ -115,9 +129,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  async function signUp(email: string, password: string, fullName: string, role: string): Promise<AuthResponse> {
+  async function signUp(email: string, password: string, fullName: string): Promise<AuthResponse> {
     try {
-      const session = await apiSignUp(email, password, fullName, role);
+      const session = await apiSignUp(email, password, fullName);
       persistSession(session);
       setUser(session.user);
       setProfile(toProfile(session.user));
