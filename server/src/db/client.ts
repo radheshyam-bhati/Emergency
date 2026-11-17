@@ -2,10 +2,18 @@ import fs from "node:fs";
 import path from "node:path";
 import Database from "better-sqlite3";
 
-const dataDirectory = path.resolve(process.cwd(), "server/data");
-const databasePath = path.join(dataDirectory, "rapid-rescue.db");
-const databaseWalPath = path.join(dataDirectory, "rapid-rescue.db-wal");
-const databaseShmPath = path.join(dataDirectory, "rapid-rescue.db-shm");
+const defaultDataDirectory = path.resolve(process.cwd(), "server/data");
+const configuredDatabasePath = process.env.DATABASE_PATH?.trim();
+
+const databasePath =
+  configuredDatabasePath === ":memory:"
+    ? ":memory:"
+    : configuredDatabasePath
+      ? path.resolve(configuredDatabasePath)
+      : path.join(defaultDataDirectory, "rapid-rescue.db");
+
+const databaseWalPath = `${databasePath}-wal`;
+const databaseShmPath = `${databasePath}-shm`;
 const schemaPath = path.resolve(process.cwd(), "server/src/db/schema.sql");
 
 let database: Database | null = null;
@@ -41,10 +49,16 @@ export const getDb = () => {
     return database;
   }
 
-  fs.mkdirSync(dataDirectory, { recursive: true });
+  if (databasePath !== ":memory:") {
+    fs.mkdirSync(path.dirname(databasePath), { recursive: true });
+  }
 
   database = new Database(databasePath);
-  database.pragma("journal_mode = WAL");
+
+  if (databasePath !== ":memory:") {
+    database.pragma("journal_mode = WAL");
+  }
+
   database.pragma("foreign_keys = ON");
   database.exec(fs.readFileSync(schemaPath, "utf8"));
   runMigrations(database);
@@ -56,6 +70,10 @@ export const resetDb = () => {
   if (database) {
     database.close();
     database = null;
+  }
+
+  if (databasePath === ":memory:") {
+    return;
   }
 
   [databasePath, databaseWalPath, databaseShmPath].forEach((targetPath) => {

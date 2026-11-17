@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Heart, Lock, Mail, Shield, User, Briefcase, Eye, EyeOff } from "lucide-react";
+import { Heart, Lock, Mail, Shield, User, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const AuthPage = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -13,7 +12,6 @@ const AuthPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
-  const [role, setRole] = useState("dispatcher");
   const [loading, setLoading] = useState(false);
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
@@ -25,7 +23,7 @@ const AuthPage = () => {
     let error;
 
     if (isSignUp) {
-      const res = await signUp(email, password, fullName, role);
+      const res = await signUp(email, password, fullName);
       error = res.error;
     } else {
       const res = await signIn(email, password);
@@ -51,7 +49,7 @@ const AuthPage = () => {
             <Heart className="h-7 w-7 text-emergency-foreground" />
           </div>
           <h1 className="text-2xl font-bold">Emergency Hospital Network</h1>
-          <p className="mt-1 text-sm text-muted-foreground">{isSignUp ? "Sign up to access the live control room." : "Sign in as an admin or dispatcher to access the live control room."}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{isSignUp ? "Create a dispatcher account to request access." : "Sign in as an admin or dispatcher to access the live control room."}</p>
         </div>
 
         <div className="rounded-xl border border-emergency/20 bg-emergency/5 p-4">
@@ -86,21 +84,6 @@ const AuthPage = () => {
                 </div>
               </div>
 
-              <div>
-                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Role</label>
-                <div className="relative">
-                  <Briefcase className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground z-10" />
-                  <Select value={role} onValueChange={setRole} required={isSignUp}>
-                    <SelectTrigger className="pl-10">
-                      <SelectValue placeholder="Select role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="dispatcher">Dispatcher</SelectItem>
-                      <SelectItem value="admin">Administrator</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
             </>
           )}
           <div>
@@ -137,8 +120,9 @@ const AuthPage = () => {
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
-                placeholder="Enter your password"
+                placeholder={isSignUp ? "At least 12 characters" : "Enter your password"}
                 className="pl-10 pr-10"
+                minLength={isSignUp ? 12 : 1}
                 required
               />
               <button

@@ -5,29 +5,28 @@ import { userModel } from "../models/user.model.js";
 
 const loginSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(6),
+  password: z.string().min(1).max(128),
 });
 
 const signupSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(6),
-  fullName: z.string().min(2),
-  role: z.enum(["admin", "dispatcher"]),
+  password: z.string().min(12).max(128),
+  fullName: z.string().min(2).max(120),
 });
 
 export const authController = {
-  signup(request: Request, response: Response) {
+  async signup(request: Request, response: Response) {
     const result = signupSchema.safeParse(request.body);
 
     if (!result.success) {
       return response.status(400).json({ message: "Invalid signup payload" });
     }
 
-    const session = authService.signup(
+    const session = await authService.signup(
       result.data.email,
       result.data.password,
       result.data.fullName,
-      result.data.role
+      "dispatcher",
     );
 
     if (!session) {
@@ -37,14 +36,14 @@ export const authController = {
     return response.json(session);
   },
 
-  login(request: Request, response: Response) {
+  async login(request: Request, response: Response) {
     const result = loginSchema.safeParse(request.body);
 
     if (!result.success) {
       return response.status(400).json({ message: "Invalid login payload" });
     }
 
-    const session = authService.login(result.data.email, result.data.password);
+    const session = await authService.login(result.data.email, result.data.password);
 
     if (!session) {
       return response.status(401).json({ message: "Invalid credentials" });
