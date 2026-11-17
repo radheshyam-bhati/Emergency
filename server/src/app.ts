@@ -3,7 +3,8 @@ import express, { type Request } from "express";
 import cors from "cors";
 import helmet from "helmet";
 import { rateLimit } from "express-rate-limit";
-import pinoHttp from "pino-http";
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const pinoHttp = require("pino-http");
 import authRoutes from "./routes/auth.routes.js";
 import hospitalsRoutes from "./routes/hospitals.routes.js";
 import ambulancesRoutes from "./routes/ambulances.routes.js";
