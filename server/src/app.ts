@@ -1,8 +1,9 @@
 import "dotenv/config";
-import express from "express";
+import express, { type Request } from "express";
 import cors from "cors";
 import helmet from "helmet";
 import { rateLimit } from "express-rate-limit";
+import pinoHttp from "pino-http";
 import authRoutes from "./routes/auth.routes.js";
 import hospitalsRoutes from "./routes/hospitals.routes.js";
 import ambulancesRoutes from "./routes/ambulances.routes.js";
@@ -11,8 +12,10 @@ import dispatchRoutes from "./routes/dispatch.routes.js";
 import activityRoutes from "./routes/activity.routes.js";
 import metricsRoutes from "./routes/metrics.routes.js";
 import { authenticate } from "./middleware/auth.middleware.js";
+import { requestIdMiddleware } from "./middleware/requestId.js";
 import { env } from "./config/env.js";
 import { getDb } from "./db/client.js";
+import { logger } from "./utils/logger.js";
 
 const allowedOrigins = env.CORS_ORIGINS.split(",")
   .map((origin) => origin.trim())
@@ -29,6 +32,25 @@ if (env.TRUST_PROXY === "true") {
 }
 
 app.use(helmet());
+app.use(requestIdMiddleware);
+app.use(
+  pinoHttp({
+    logger,
+    redact: ["req.headers.authorization", "req.headers.cookie"],
+    serializers: {
+      req: (req: any) => ({
+        method: req.method,
+        url: req.url,
+        requestId: req.requestId,
+        headers: req.headers,
+      }),
+      res: (res: any) => ({
+        statusCode: res.statusCode,
+        headers: res.getHeaders ? res.getHeaders() : {},
+      }),
+    },
+  }),
+);
 app.use(
   cors({
     origin(origin, callback) {
@@ -91,11 +113,17 @@ app.use((_request, response) => {
 app.use(
   (
     error: Error,
-    _request: express.Request,
+    request: Request,
     response: express.Response,
     _next: express.NextFunction,
   ) => {
-    console.error(error);
+    logger.error(
+      {
+        err: error,
+        requestId: (request as Request & { requestId?: string }).requestId,
+      },
+      "Internal server error",
+    );
     response.status(500).json({ message: "Internal server error" });
   },
 );
