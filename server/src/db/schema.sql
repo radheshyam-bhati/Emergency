@@ -112,5 +112,10 @@ CREATE TABLE IF NOT EXISTS activity_logs (
 );
 
 CREATE INDEX IF NOT EXISTS idx_emergencies_status ON emergencies(status);
+CREATE INDEX IF NOT EXISTS idx_emergencies_hospital ON emergencies(assigned_hospital_id);
+CREATE INDEX IF NOT EXISTS idx_emergencies_ambulance ON emergencies(assigned_ambulance_id);
 CREATE INDEX IF NOT EXISTS idx_dispatches_status ON dispatches(status);
+CREATE INDEX IF NOT EXISTS idx_dispatches_emergency ON dispatches(emergency_id);
+CREATE INDEX IF NOT EXISTS idx_dispatches_ambulance ON dispatches(ambulance_id);
 CREATE INDEX IF NOT EXISTS idx_activity_logs_created_at ON activity_logs(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_activity_logs_entity ON activity_logs(entity_type, entity_id);
