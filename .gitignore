@@ -26,3 +26,12 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local runtime data and local package cache
+server/data/
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+.npm-cache/

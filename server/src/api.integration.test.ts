@@ -2,12 +2,12 @@
 
 import "dotenv/config";
 import type { NextFunction, Request, RequestHandler, Response } from "express";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterAll, afterEach, beforeEach, describe, expect, it } from "vitest";
 import { authController } from "./controllers/auth.controller.js";
 import { emergenciesController } from "./controllers/emergencies.controller.js";
 import { hospitalsController } from "./controllers/hospitals.controller.js";
 import { metricsController } from "./controllers/metrics.controller.js";
-import { getDb } from "./db/client.js";
+import { getDb, resetDb } from "./db/client.js";
 import { seedDatabase } from "./db/seed.js";
 import { ambulanceModel } from "./models/ambulance.model.js";
 import { dispatchModel } from "./models/dispatch.model.js";
@@ -17,8 +17,8 @@ import { operationsService } from "./services/operations.service.js";
 import { seaeService } from "./services/seae.service.js";
 
 const loginPayload = {
-  email: "admin@gmail.com",
-  password: "admin@123",
+  email: process.env.DEMO_ADMIN_EMAIL ?? "admin@example.com",
+  password: process.env.DEMO_ADMIN_PASSWORD ?? "test-admin-password",
 };
 
 type MockRequestShape = Partial<Request> & {
@@ -119,6 +119,11 @@ describe("Rapid Rescue Grid API", () => {
 
   afterEach(() => {
     operationsService.stopLifecycleLoop();
+  });
+
+  afterAll(() => {
+    operationsService.stopLifecycleLoop();
+    resetDb();
   });
 
   it("logs in and reaches a protected endpoint", async () => {
