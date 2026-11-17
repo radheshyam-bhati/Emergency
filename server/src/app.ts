@@ -1,5 +1,6 @@
 import "dotenv/config";
 import express, { type Request } from "express";
+import type { ServerResponse } from "node:http";
 import cors from "cors";
 import helmet from "helmet";
 import { rateLimit } from "express-rate-limit";
@@ -39,13 +40,13 @@ app.use(
     logger,
     redact: ["req.headers.authorization", "req.headers.cookie"],
     serializers: {
-      req: (req: any) => ({
+      req: (req: Request) => ({
         method: req.method,
         url: req.url,
-        requestId: req.requestId,
+        requestId: (req as Request & { requestId?: string }).requestId,
         headers: req.headers,
       }),
-      res: (res: any) => ({
+      res: (res: ServerResponse) => ({
         statusCode: res.statusCode,
         headers: res.getHeaders ? res.getHeaders() : {},
       }),

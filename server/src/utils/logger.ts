@@ -1,4 +1,5 @@
 import pino from "pino";
+import type { Request, Response } from "express";
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -16,12 +17,12 @@ export const logger = pino({
       },
   redact: ["req.headers.authorization", "req.headers.cookie"],
   serializers: {
-    req: (req: any) => ({
+    req: (req: Request) => ({
       method: req.method,
       url: req.url,
       headers: req.headers,
     }),
-    res: (res: any) => ({
+    res: (res: Response) => ({
       statusCode: res.statusCode,
       headers: res.getHeaders ? res.getHeaders() : {},
     }),
